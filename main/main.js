@@ -18,8 +18,7 @@ dojo.require("dijit.form.RadioButton");
 dojo.require("dojox.charting.action2d.Tooltip");
 dojo.require("dojox.charting.action2d.Magnify");
 dojo.require("dojox.charting.action2d.Highlight");
-dojo.require("dojox.charting.action2d.MoveSlice");
- 
+dojo.require("dojox.charting.action2d.MoveSlice"); 
 dojo.require("dijit.TooltipDialog");
 dojo.require("dojo._base.event");
 dojo.require("dijit.Dialog");
@@ -30,6 +29,7 @@ dojo.require("dijit.TitlePane");
 dojo.require("dojox.charting.themes.Claro");
 dojo.require("dojo.dom-construct");
 dojo.require("dojo.dom");
+dojo.require("dojo.data.ItemFileWriteStore");
 
 // esri 
 dojo.require("esri.map");
@@ -38,7 +38,6 @@ dojo.require("esri.tasks.locator");
 dojo.require("esri.dijit.BasemapGallery");
 dojo.require("esri.dijit.OverviewMap");
 dojo.require("esri.dijit.Measurement");
-dojo.require("esri.dijit.Legend");
 dojo.require("esri.dijit.TimeSlider");
 dojo.require("esri.dijit.editing.Editor-all");
 dojo.require("esri.arcgis.utils");
@@ -56,15 +55,7 @@ dojo.require("esri.widgets");
 dojo.require("esri.dijit.Bookmarks");
 dojo.require("esri.dijit.Directions");
 dojo.require("esri.arcgis.Portal")
-
-//esri-cis
-dojo.require("esri-cis.dijit.routing");
-dojo.require("esri-cis.dijit.dateFilter");
-
-//google - удалите следующие три строки для отключения модулей Google
 dojo.require("dojo.fx");
-dojo.require("agsjs.dijit.TOC");
-dojo.require("agsjs.layers.GoogleMapsLayer");
 
 //other
 dojo.require("app.OAuthHelper");
@@ -92,6 +83,13 @@ function startApp()
 	
 	dojo.style(editDialog.closeButtonNode,"display","none");
 	
+	geocoderDialog =  new dijit.Dialog ({
+			content : "Поиск ...",
+			closable : false
+	});
+	
+	dojo.style(geocoderDialog.closeButtonNode,"display","none");
+	
 	loadAppDialog.show();
 
 	try
@@ -109,7 +107,7 @@ function startApp()
 		errorDialog.show();
 		loadAppDialog.hide();
 	};
-	
+
 	if (config.portal != undefined)
 	{
 		try 
@@ -129,6 +127,7 @@ function startApp()
 		};
 	}
 	
+
 	try 
 	{
 		Design();
@@ -242,7 +241,7 @@ function LoadConfig()
 			throw new AGSViewerException (102, 'Ошибка в секции [portal].');
 		}
 	}
-		
+
 	try
 	{
 		var _proxy = xmlDoc.getElementsByTagName("proxy");
@@ -273,14 +272,15 @@ function LoadConfig()
 		tasks.geocoder = new Object;
 		tasks.geocoder.url = ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("url") == undefined)) ? 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer' : _geocoder[0].getAttribute("url");	
 		tasks.geocoder.singleLineFieldName =  ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("singleLineFieldName") == undefined)) ? 'SingleLine' : _geocoder[0].getAttribute("singleLineFieldName");
-	
+		tasks.geocoder.arcgisGeocoder = (tasks.geocoder.url.indexOf ('geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer') >= 0);
+
 		var _route = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("route") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("route");
 		tasks.route = new Object;
 		tasks.route.url = ((_route == undefined) || (_route[0] == undefined) || (_route[0].getAttribute("url") == undefined)) ? 'http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World' : _route[0].getAttribute("url");	
 	
 		var _print = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("print") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("print");
 		tasks.print = new Object;
-		tasks.print.url = ((_print == undefined) || (_print[0] == undefined) || (_print[0].getAttribute("url") == undefined)) ? 'http://sampleserver6.arcgisonline.com/arcgis/rest/directories/arcgisoutput/Utilities/PrintingTools_GPServer/Utilities_PrintingTools' : _print[0].getAttribute("url");	
+		tasks.print.url = ((_print == undefined) || (_print[0] == undefined) || (_print[0].getAttribute("url") == undefined)) ? 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task' : _print[0].getAttribute("url");	
 		
 		config.tasks = tasks;
 	}
@@ -504,17 +504,17 @@ function LoadConfig()
 						throw new AGSViewerException (1057, 'Ошибка в секции [bookmarks].');
 					}
 				}
-			
+				
 				try
 				{
-					if (widget.getAttribute("type") == "legend")
+					if (widget.getAttribute("type") == "list")
 					{
-						dijits.legend = new Object;
+						dijits.list = new Object;
 					}
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1058, 'Ошибка в секции [legend].');
+					throw new AGSViewerException (1058, 'Ошибка в секции [list].');
 				}
 				
 				try
@@ -526,7 +526,7 @@ function LoadConfig()
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1059, 'Ошибка в секции [toc].');
+					throw new AGSViewerException (1060, 'Ошибка в секции [toc].');
 				}
 			
 				try
@@ -539,7 +539,7 @@ function LoadConfig()
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1060, 'Ошибка в секции [info].');
+					throw new AGSViewerException (1061, 'Ошибка в секции [info].');
 				}
 			
 				try
@@ -561,7 +561,7 @@ function LoadConfig()
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1061, 'Ошибка в секции [identify].');
+					throw new AGSViewerException (1062, 'Ошибка в секции [identify].');
 				}
 			
 				try
@@ -574,7 +574,7 @@ function LoadConfig()
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1062, 'Ошибка в секции [route].');
+					throw new AGSViewerException (1063, 'Ошибка в секции [route].');
 				}
 			
 				
@@ -588,19 +588,19 @@ function LoadConfig()
 						
 						if (dijits.dateFilter.field == undefined)
 						{
-							throw new AGSViewerException (10631, 'Не задан параметр field.');
+							throw new AGSViewerException (10641, 'Не задан параметр field.');
 						}
 					}
 				}
 				catch (err)
 				{	
-					if (err.code == 10631)
+					if (err.code == 10641)
 					{
-						throw new AGSViewerException (1063, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
+						throw new AGSViewerException (1064, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
 					}
 					else
 					{
-						throw AGSViewerException (1063, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
+						throw AGSViewerException (1064, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
 					}
 				}
 			});
@@ -676,9 +676,6 @@ function LoadConfig()
 			layer.title   = item1.getAttribute("title");
 			layer.toc     = (item1.getAttribute("toc") == "true");
 			layer.tocSlider  = (item1.getAttribute("tocSlider") == "true");
-			layer.tocLegend  = (item1.getAttribute("tocLegend") == "true");
-			layer.legend     = (item1.getAttribute("lehend") == "true");
-			layer.list       = (item1.getAttribute("list") == "true");
 			basemap.layers.push (layer);
 		});
 
@@ -704,13 +701,10 @@ function LoadConfig()
 		layer.id       = item.getAttribute("id");
 		layer.url      = item.getAttribute("url");
 		layer.portalId = item.getAttribute("portalId"); 
-		layer.legend   = (item.getAttribute("legend") == "true");
 		layer.toc      = (item.getAttribute("toc") == "true");
 		layer.tocSlider  = (item.getAttribute("tocSlider") == "true");
-		layer.tocLegend  = (item.getAttribute("tocLegend") == "true");
 		layer.dateFilter = (item.getAttribute("dateFilter") == "true");
 		layer.visible  = item.getAttribute("visible");
-		layer.list     = (item.getAttribute("list") == "true");
 		layer.title    = item.getAttribute("title");
 		layer.token    = item.getAttribute("token");	
 		
@@ -1189,8 +1183,6 @@ function GetItemUrls (items)
 			}
 		}
 	}
-	
-	createApp();
 }
 
 function Design()
@@ -1216,9 +1208,8 @@ function Design()
 	}
 	else if (config.design.heading.type == "image")
 		{
-			dojo.style(dojo.byId("heading"), "background-image", "url(" + config.design.heading.fillimage + ")");
+			dojo.style(dojo.byId("heading"), "background", "url(" + config.design.heading.fillimage + ") repeat-x");
 			dojo.style(dojo.byId("heading"), "background-position", "left top");
-			dojo.style(dojo.byId("heading"), "background-repeat", "repeat-x");
 		
 			var img = document.createElement("img");
 			img.setAttribute ("src", config.design.heading.image);
@@ -1257,7 +1248,7 @@ function LoadMap()
 		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false})
 		map['noBasemap'] = true;
 	}
-	
+		
 	map.on ('layers-add-result', LayersAddedToMap);
 	map.on ('click', OnMapClick);
 	map.on ('load', OnMapLoad);
@@ -1449,23 +1440,19 @@ function LoadMap()
 		layer ['title']      = config.map.layers[i].title;
 		layer ['toc']        = config.map.layers[i].toc;
 		layer ['tocSlider']  = config.map.layers[i].tocSlider;
-		layer ['tocLegend']  = config.map.layers[i].tocLegend;
-		layer ['legend']     = config.map.layers[i].legend;
-		layer ['list']       = config.map.layers[i].list;
 		layer ['dateFilter'] = config.map.layers[i].dateFilter;	
 
 		layers.push (layer);		
 	}
-	
+
 	map.addLayers(layers);
-			
+	
 	tooltipDialog = new dijit.TooltipDialog({
           id: "tooltipDialog",
           style: "position: absolute; width: 250px; font: normal normal normal 10pt Helvetica;z-index:100"
     });
-		
-    tooltipDialog.startup();
 	
+    tooltipDialog.startup();
 	BindMapInfoWindowEvents();
 }
 
@@ -1926,22 +1913,6 @@ function LoadWidgets()
 		dijit.byId ("propsContainer").removeChild (dijit.byId ("basemapPanel"));
 	}
 	
-	if (config.widgets.legend != undefined)
-	{
-		try
-		{
-			AddLegendWidget();
-		}
-		catch (err)
-		{
-			throw new AGSViewerException (407, "Ошибка создания виджета легенды.");
-		}
-	}
-	else
-	{
-		dijit.byId ("propsContainer").removeChild (dijit.byId ("legendPanel"));
-	}
-	
 	if (config.widgets.toc != undefined)
 	{
 		try
@@ -1950,7 +1921,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (408, "Ошибка создания виджета таблицы содержания.");
+			throw new AGSViewerException (409, "Ошибка создания виджета таблицы содержания.");
 		}
 	}
 	else
@@ -1966,7 +1937,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (409, "Ошибка создания виджета закладок.");
+			throw new AGSViewerException (410, "Ошибка создания виджета закладок.");
 		}
 	}
 	else
@@ -1982,7 +1953,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (410, "Ошибка создания виджета дополнительной информации.");
+			throw new AGSViewerException (411, "Ошибка создания виджета дополнительной информации.");
 		}	
 	}
 	else
@@ -1999,7 +1970,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (411, "Ошибка создания виджета фильтрации объектов по дате.");
+			throw new AGSViewerException (412, "Ошибка создания виджета фильтрации объектов по дате.");
 		}
 	}	
 	else
@@ -2022,7 +1993,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (412, "Ошибка создания виджета масштабной линейки.");
+			throw new AGSViewerException (413, "Ошибка создания виджета масштабной линейки.");
 		}
 	}
 				
@@ -2034,40 +2005,13 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (413, "Ошибка создания виджета обзорного окна карты.");
+			throw new AGSViewerException (414, "Ошибка создания виджета обзорного окна карты.");
 		}
 	}	
 
 	dojo.connect (dijit.byId ('toolsContainer'), 'selectChild', ToolsTabSelected);
 	
 	return 0;
-}
-
-function AddLegendWidget() 
-{
-	var layerInfos = [];
-	
-	for (var i = 0; i < map.layers.length; i++)
-	{
-		if (map.layers[i].legend)
-		{
-			layerInfos.push (
-				{
-					layer    : map.layers[i],
-					title    : map.layers[i].title
-				}
-			);
-		}
-	}
-	
-	var legend = new esri.dijit.Legend({
-		map        : map,
-		layerInfos : layerInfos,
-		autoUpdate : true,
-		id         : 'legend'
-	}, 'legendPanel');
-	
-	legend.startup();
 }
 
 function AddRouteWidget()
@@ -2120,10 +2064,9 @@ function AddRouteWidget()
 		id : "routeDijit"
 	}, 'route');
 		
-	//dijit.byId ('routePanel').addChild (routeDijit);
 	routeDijit.startup();
-	
 	dojo.connect (routeDijit, "onDirectionsFinish", DirectionsFinish);
+	routeDijit.on ('directions-clear', DirectionsClear);
 }
 
 function DirectionsFinish (res)
@@ -2134,6 +2077,11 @@ function DirectionsFinish (res)
 		map.routeLayer.clear();
 		map.routeLayer.add (res.routeResults[0].route);
 	};
+}
+
+function DirectionsClear ()
+{
+	map.routeLayer.clear();
 }
 
 function AddTocWidget() 
@@ -2148,8 +2096,7 @@ function AddTocWidget()
 				{
 					layer    : map.layers[i],
 					title    : map.layers[i].title,
-					slider   : map.layers[i].tocSlider,
-					noLegend : ! map.layers[i].tocLegend
+					slider   : map.layers[i].tocSlider
 				}
 			);
 		}
@@ -2164,7 +2111,6 @@ function AddTocWidget()
 	
 	toc.startup();	  
 }
-
 
 function AddEditorWidget() 
 {
@@ -2643,14 +2589,21 @@ function destroyEditor()
 
 function AddGeocoderWidget() 
 {
-	map ['geocoderResultLayer'] = new esri.layers.GraphicsLayer();
+	map ['geocoderResultLayer'] = new esri.layers.GraphicsLayer({id : 'geocoderResults'});
 	map.addLayer (map.geocoderResultLayer);
 	dojo.connect (map.geocoderResultLayer, "onClick", geocoderResultLayerClick);
 	
-	map ['geocoderResultSymbol'] = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE, 14,
-		new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-		new dojo.Color([255,0,0]), 1),
-		new dojo.Color([0,255,0,0.25]));
+	map ['geocoderResultSymbol'] = //new esri.symbol.SimpleMarkerSymbol('solid', 20, null, new dojo.Color([255,0,0,1]));
+	     new esri.symbol.SimpleMarkerSymbol(
+            esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, 
+            12, 
+            new esri.symbol.SimpleLineSymbol(
+              esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+              new dojo.Color([210, 105, 30, 0.5]), 
+              8
+            ), 
+            new dojo.Color([210, 105, 30, 0.9])
+          );
 
 	if (config.tasks.geocoder.arcgisGeocoder)
 	{
@@ -2676,19 +2629,19 @@ function AddGeocoderWidget()
 			autocomplete: true,
 			arcgisGeocoder: false,			
 			geocoders: geocoders
-        }, 'search');
-		
-		
+        }, 'search');		
 	}
 
-	dojo.connect (geocoder, "onFindResults", GeocoderOnFindResults);
+	
 	dojo.connect (geocoder, "onClear", GeocoderClear);
-	dojo.connect (geocoder, "onSelect", GeocoderSelect);
+	geocoder.on ('select', GeocoderSelect);
+	dojo.connect (geocoder, "onFindResults", GeocoderOnFindResults);
 	geocoder.startup();
 }
 
 function GeocoderOnFindResults (results)
 {
+	geocoderDialog.hide();
 	map.geocoderResultLayer.clear();
 	
 	if (results.results.length > 0)
@@ -2696,30 +2649,31 @@ function GeocoderOnFindResults (results)
 		results.results[0].feature.setSymbol (map.geocoderResultSymbol);
 		results.results[0].feature.attributes ['name'] = results.results[0].name;
 		map.geocoderResultLayer.add (results.results[0].feature);
-		map.centerAndZoom(results.results[0].feature, 16);
+		map.centerAt(results.results[0].feature);
 	}	
 }
 
 function GeocoderClear ()
 {
 	map ['geocoderResultLayer'].clear();
+	map.infoWindow.hide();
 }
 
-function GeocoderSelect (results)
+function GeocoderSelect (result)
 {
-
+	map.geocoderResultLayer.clear();
+	result.result.feature.setSymbol (map.geocoderResultSymbol);
+	result.result.feature.attributes ['name'] = result.result.name;
+	map.geocoderResultLayer.add (result.result.feature);
+	map.centerAt(result.result.feature);
 }
 
 function geocoderResultLayerClick (evt)
 {
+	map.infoWindow.resize (300, 100);
 	map.infoWindow.setTitle  ("Информация о найденном объекте");
 	map.infoWindow.setContent (evt.graphic.attributes.name);
 	map.infoWindow.show (evt.mapPoint);	
-}
-
-function GeocoderOnAutoCompleteResults (results)
-{
-	geocoder.select (results.results[0]);
 }
 
 function ApplyTimePicker()
@@ -3158,4 +3112,11 @@ function BuildFeaturePopup (feature, popup)
 	}
 			
 	feature.setInfoTemplate(template);
+}
+
+function formatDate(date, datePattern) {
+  return dojo.date.locale.format(date, {
+    selector: 'date',
+    datePattern: datePattern
+  });
 }

@@ -11,7 +11,7 @@
 		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.6/js/dojo/dijit/themes/claro/document.css">		
 		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.6/js/esri/css/esri.css" />
 		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.6/js/dojo/dojox/layout/resources/ExpandoPane.css">		
-		<link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/src/agsjs/css/agsjs.css">
+
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		
 		<style>
@@ -75,7 +75,8 @@
 					parseOnLoad: true,
 					packages:[					
 						{name:"app", location: location.pathname.replace(/\/[^/]+$/, '') + '/javascript'},
-						{name:"agsjs",location:'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/src/agsjs'}
+						{name:"esri-cis",location:location.pathname.replace(/\/[^/]+$/, '') + '/esri-cis'},
+						{name:"agsjs",location:'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/2.07/src/agsjs'}
 					]
 				};
 			}
@@ -122,6 +123,7 @@
 		<div dojoType="dijit.layout.BorderContainer" id="outerContainer" data-dojo-props="design:'headline', gutters:false">
 			<div id = "header" dojoType="dijit.layout.ContentPane" region="top">
 				<div id = "heading"></div>
+				<div id = "portalUser" style='display:none;'></div>
 			</div>
 			
 				<div id = "tools" dojoType="dojox.layout.ExpandoPane" region="left" title="Инструменты" style = "width: 250px" data-dojo-props="splitter:true">
@@ -148,8 +150,9 @@
 				
 				<div id = "props" dojoType="dojox.layout.ExpandoPane" region="right" title="Отображение и информация" style = "width:285px" data-dojo-props="splitter:true">
 					<div id = "propsContainer" dojoType = "dijit.layout.AccordionContainer" style="width: 100%; height: 100%;">
-						<div id = "tocPanel" dojoType = "dijit.layout.ContentPane" title = "Таблица содержания" style="overflow: auto;" iconClass = "esriLayerIcon"><div id = 'toc'></div></div>
-						<div id = "basemapPanel" data-dojo-type = "dijit.layout.ContentPane" region = "center" title = "Базовая карта"  style="overflow: auto;" iconClass = "esriBasemapIcon"></div>
+						<div id = "tocPanel" dojoType = "dijit.layout.ContentPane" title = "Список слоев с легендой" style="overflow: auto;" iconClass = "esriLayerIcon"><div id = 'toc'></div></div>
+						<div id = "basemapPanel" data-dojo-type = "dijit.layout.ContentPane" region = "center" title = "Базовая карта"  style="overflow: auto;" iconClass = "esriBasemapIcon">
+						</div>
 						<div id = "bookmarkPanel" dojoType = "dijit.layout.ContentPane" title = "Закладки" style="overflow: auto;" iconClass = "esriBookmarkIcon"></div>
 						<div id = "dateFilterPanel" dojoType = "dijit.layout.ContentPane" title = "Фильтр по дате" iconClass = "dateFilterIcon" style="display:none;"> 
 							<div id="dateFilterSingle" data-dojo-type="dijit.layout.ContentPane" data-dojo-props='region:"bottom"' style = "display: block">

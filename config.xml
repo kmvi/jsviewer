@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" ?>
+<configuration>	
+	<!-- Используемые в приложении виджеты и их параметры -->
+	<proxy
+		useProxy = "true"
+		proxyUrl = "proxy.ashx"
+	/>
+		
+    <dijits>
+		<dijit type   = "toc"/>
+		
+		<dijit type="editor"
+			   toolbar = "true">
+			   
+			   <tools
+					undo-redoTool = "true"
+					undo-redoMaxOperations = "15"
+					mergeTool = "true"
+					cutTool = "true"
+					reshapeTool = "true"
+					polygonDrawTools  = "POLYGON,FREEHAND_POLYGON,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE"
+					polylineDrawTools = "POLYLINE,FREEHAND_POLYLINE,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE"	
+				/>			   
+		</dijit>
+		
+		<dijit type = "bookmarks"
+			   editable = "true">
+			   
+			   <bookmarks>
+					<bookmark
+						title  = "Начальный">
+						
+						<extent
+							xmin = "2111292"
+							ymin = "4701998"
+							xmax = "11564616"
+							ymax = "9813291"
+						/>						
+					</bookmark>					
+			   </bookmarks>
+		</dijit>
+		
+		<dijit type="info"
+         	    html = "Разработка компании &lt;a href = &quot;http://www.esri-cis.ru&quot; target = &quot;_blank&quot; &gt;Esri CIS&lt;/a&gt;.&lt;/br&gt;&lt;/br&gt; Версия 1.0 (сборка 05.07.2013).&lt;/br&gt;&lt;/br&gt;&lt;a href = &quot;help.docx&quot; target = &quot;_blank&quot; &gt;&lt;B&gt;Загрузить справку.&lt;/&gt;&lt;/a&gt;"/>
+		
+		<dijit type="geocoder" />
+			   
+		<dijit type="measure"
+			   snappingLayerIDs = ""/>
+			   
+		<dijit type     = "layers"
+			   grouping = "false"		
+		/>
+		
+		<dijit type="scalebar"/>
+		
+		<dijit type="basemaps" 
+		       arcgismaps = "true"
+			   googlemaps="true"/>
+
+		<dijit type="overviewmap"/>	
+		
+		<dijit type = "print"
+			   title = "ArcGIS Viewer for JavaScript 1.0 beta"
+			   owner = "ESRI CIS"/>
+		
+		<dijit type="route"/>
+					
+		<dijit type="identify"
+			   tolerance="10"/>
+			   
+		<dijit type        = "dateFilter"	
+			   limits      = "double"
+			   field       = "create_date"/>
+			   		
+    </dijits>
+   
+   <!-- Конфигурация карты -->
+    <map>
+		
+		<options
+			wrapAround180      = "true"
+			wkid               = "102100"
+			slider             = "large"
+			logoVisible        = "false"
+			attributionVisible = "false" 
+			basemap            = "osm">
+			
+			<extent
+				xmin = "3494598"
+				ymin = "7151549"
+				xmax = "4945067"
+				ymax = "7930596"
+			/>			
+		</options>
+		
+		<basemaps>		
+			<basemap
+				title = "Карта Росреестра"
+				basemapgalleryimg = "images/basemaps/basemap_rosreestr.png"
+				id = "rosreestr">
+				
+				<layers>
+					<layer
+						type      = "tiled"
+						url       = "http://maps.rosreestr.ru/ArcGIS/rest/services/BaseMaps/BaseMap/MapServer"		
+						id        = "rosreestr_base"
+						title     = "Карта Росреестра (подложка)"
+						opacity   = "1" 
+						token     = ""
+					/>					
+					<layer
+						type = "tiled"
+						url = "http://maps.rosreestr.ru/ArcGIS/rest/services/BaseMaps/Anno/MapServer"		
+						id  = "rosreestr_anno"
+						title = "Карта Рореестра (подписи)"
+						opacity = "1" 						
+						token     = ""
+					/>
+				</layers>
+			</basemap>
+			
+			<basemap
+				title = "Россия"
+				visible = "true"
+				basemapgallery = "true"
+				basemapgalleryimg = "images/basemaps/basemap_russia_topo.jpg"
+				id = "russia_topo">
+				
+				<layers>
+					<layer
+						type      = "tiled"
+						url       = "http://46.137.184.237/arcgis/rest/services/russia_topo/MapServer"		
+						id        = "russia_topo"
+						title     = "Россия"
+					/>					
+				</layers>
+			</basemap>
+		</basemaps>	
+				
+		<mapLayers>				
+			<layer
+				type     = "dynamic"
+				id       = "0"
+				title    = "Регионы РФ"
+				url      = "http://46.137.184.237/arcgis/rest/services/jsviewer/regions/MapServer"
+				visible  = "true"
+				toc      = "true"
+				tosSlider = "true"
+				token = "">
+			
+				<sublayers>
+					<sublayer
+						id = "0"
+						title = "Регионы РФ"
+						visible = "true">
+						
+						<popup 
+							title = "{RegionNa_1}">
+							
+							<fieldInfos>
+								<fieldInfo
+									label = "Код региона"
+									field = "RegionCode"
+									visible = "true"
+								/>
+								
+								<fieldInfo
+									label = "Инвестиции в 2008 г., млн. руб."
+									field = "Year2008"
+									visible = "true"
+									numericFormat = "3,true"
+								/>
+									
+							</fieldInfos>
+							
+							<mediaInfos
+								title  = "Статистика">
+							
+								<mediaInfo
+									title    = "Динамика инвестиций за 2000 - 2008 гг."
+									type     = "linechart"
+									subtype  = "Markers"
+									fields   = "Year2000,Year2001,Year2002,Year2003,Year2004,Year2005,Year2006,Year2007,Year2008"		
+									labels   = "2000,2001,2002,2003,2004,2005,2006,2007,2008"
+								/>	
+								
+								<mediaInfo
+									title    = "Распределение инвестиций по отрасляи в 2008 г."
+									type     = "linechart"
+									subtype  = "Pie"
+									fields   = "Zhilischa,Zdanija,Oborudovan,Prochee"	
+									labels   = "Жилые здания,Нежилие помещения,Оборудование,Прочее"
+								/>	
+							</mediaInfos>
+						</popup>
+					
+						
+					</sublayer>
+				</sublayers>
+			</layer>
+			
+			<layer
+				type = "dynamic"
+				id = "1"
+				title = "Точки и полигоны"
+				url = "http://46.137.184.237:6080/arcgis/rest/services/jsviewer/points_polygons_ms/MapServer"
+				visible="true" 
+				toc  = "true"
+				tocSlider = "false"
+				token = ""
+				dateFilter = "true">
+				
+				<sublayers>
+					<sublayer
+						id = "0"
+						title = "Точки"
+						definitionExpression = "creator = $login"
+						definitionExpressionSkipLogins = "superuser"
+						visible = "true">
+						
+						<popup
+							title = "Точки">
+
+							<fieldInfos>
+								<fieldInfo
+									label = "Название"
+									field = "Name"
+									visible = "true"
+								/>
+								
+								<fieldInfo
+									label = "Цвет"
+									field = "Color"
+									visible = "true"
+								/>
+								
+								<fieldInfo
+									label = "Дата последнего изменения"
+									field = "edit_date"
+									visible = "true"
+									format = "d MMMM yyyy г."
+								/>
+							</fieldInfos>
+						</popup>	
+						
+						<edit
+							featureServiceUrl = "http://46.137.184.237:6080/arcgis/rest/services/jsviewer/points_polygons_fs/FeatureServer/0">
+							
+							<fields>
+								<field name = "name" label = "Название"/>
+								<field name = "color"  label = "Цвет"/>
+							</fields>					
+						</edit>												
+					</sublayer>
+					<sublayer
+						id = "1"
+						title = "Полигоны"
+						definitionExpression = "creator = $login"
+						definitionExpressionSkipLogins = "superuser"
+						visible = "true">
+						
+						<popup
+							title = "Полигоны">
+
+							<fieldInfos>
+								<fieldInfo
+									label = "Название"
+									field = "name"
+									visible = "true"
+								/>
+								
+								<fieldInfo
+									label = "Цвет"
+									field = "color"
+									visible = "true"
+								/>
+								
+								<fieldInfo
+									label = "Дата последнего изменения"
+									field = "edit_date"
+									visible = "true"
+									format = "d MMMM yyyy г."
+								/>
+							</fieldInfos>
+						</popup>	
+						
+						<edit
+							featureServiceUrl = "http://46.137.184.237:6080/arcgis/rest/services/jsviewer/points_polygons_fs/FeatureServer/1">
+							
+							<fields>
+								<field name = "name" label = "Название"/>
+								<field name = "color"  label = "Цвет"/>
+							</fields>					
+						</edit>											
+					</sublayer>
+				</sublayers>
+			</layer>
+				
+		</mapLayers>
+    </map>
+</configuration>
