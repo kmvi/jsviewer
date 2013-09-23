@@ -35,6 +35,7 @@
 							ymin = "4701998"
 							xmax = "11564616"
 							ymax = "9813291"
+							wkid = "102100"
 						/>						
 					</bookmark>					
 			   </bookmarks>
@@ -58,7 +59,7 @@
 		       arcgismaps = "true"
 			   googlemaps="true"/>
 
-		<dijit type="overviewmap"/>	
+		<dijit type="overview"/>	
 		
 		<dijit type = "print"
 			   title = "ArcGIS Viewer for JavaScript 1.0 beta"
@@ -97,7 +98,7 @@
 		<basemaps>		
 			<basemap
 				title = "Карта Росреестра"
-				basemapgalleryimg = "images/basemaps/basemap_rosreestr.png"
+				image = "images/basemaps/basemap_rosreestr.png"
 				id = "rosreestr">
 				
 				<layers>
@@ -119,23 +120,6 @@
 					/>
 				</layers>
 			</basemap>
-			
-			<basemap
-				title = "Россия"
-				visible = "true"
-				basemapgallery = "true"
-				basemapgalleryimg = "images/basemaps/basemap_russia_topo.jpg"
-				id = "russia_topo">
-				
-				<layers>
-					<layer
-						type      = "tiled"
-						url       = "http://46.137.184.237/arcgis/rest/services/russia_topo/MapServer"		
-						id        = "russia_topo"
-						title     = "Россия"
-					/>					
-				</layers>
-			</basemap>
 		</basemaps>	
 				
 		<mapLayers>				
@@ -146,7 +130,7 @@
 				url      = "http://46.137.184.237/arcgis/rest/services/jsviewer/regions/MapServer"
 				visible  = "true"
 				toc      = "true"
-				tosSlider = "true"
+				tocSlider = "true"
 				token = "">
 			
 				<sublayers>
@@ -158,41 +142,39 @@
 						<popup 
 							title = "{RegionNa_1}">
 							
-							<fieldInfos>
-								<fieldInfo
+							<fields>
+								<field
 									label = "Код региона"
-									field = "RegionCode"
+									name = "RegionCode"
 									visible = "true"
 								/>
 								
-								<fieldInfo
+								<field
 									label = "Инвестиции в 2008 г., млн. руб."
-									field = "Year2008"
+									name = "Year2008"
 									visible = "true"
 									numericFormat = "3,true"
 								/>
 									
-							</fieldInfos>
+							</fields>
 							
-							<mediaInfos
+							<charts
 								title  = "Статистика">
 							
-								<mediaInfo
+								<chart
 									title    = "Динамика инвестиций за 2000 - 2008 гг."
-									type     = "linechart"
-									subtype  = "Markers"
+									type  = "Markers"
 									fields   = "Year2000,Year2001,Year2002,Year2003,Year2004,Year2005,Year2006,Year2007,Year2008"		
 									labels   = "2000,2001,2002,2003,2004,2005,2006,2007,2008"
 								/>	
 								
-								<mediaInfo
+								<chart
 									title    = "Распределение инвестиций по отрасляи в 2008 г."
-									type     = "linechart"
-									subtype  = "Pie"
+									type     = "Pie"
 									fields   = "Zhilischa,Zdanija,Oborudovan,Prochee"	
 									labels   = "Жилые здания,Нежилие помещения,Оборудование,Прочее"
 								/>	
-							</mediaInfos>
+							</charts>
 						</popup>
 					
 						
@@ -222,26 +204,26 @@
 						<popup
 							title = "Точки">
 
-							<fieldInfos>
-								<fieldInfo
+							<fields>
+								<field
 									label = "Название"
-									field = "Name"
+									name = "Name"
 									visible = "true"
 								/>
 								
-								<fieldInfo
+								<field
 									label = "Цвет"
-									field = "Color"
+									name = "Color"
 									visible = "true"
 								/>
 								
-								<fieldInfo
+								<field
 									label = "Дата последнего изменения"
-									field = "edit_date"
+									name = "edit_date"
 									visible = "true"
 									format = "d MMMM yyyy г."
 								/>
-							</fieldInfos>
+							</fields>
 						</popup>	
 						
 						<edit
@@ -263,26 +245,26 @@
 						<popup
 							title = "Полигоны">
 
-							<fieldInfos>
-								<fieldInfo
+							<fields>
+								<field
 									label = "Название"
-									field = "name"
+									name = "name"
 									visible = "true"
 								/>
 								
-								<fieldInfo
+								<field
 									label = "Цвет"
-									field = "color"
+									name = "color"
 									visible = "true"
 								/>
 								
-								<fieldInfo
+								<field
 									label = "Дата последнего изменения"
-									field = "edit_date"
+									name = "edit_date"
 									visible = "true"
 									format = "d MMMM yyyy г."
 								/>
-							</fieldInfos>
+							</fields>
 						</popup>	
 						
 						<edit
@@ -295,6 +277,69 @@
 						</edit>											
 					</sublayer>
 				</sublayers>
+			</layer>
+			
+			<layer
+				type = "feature"
+				id = "2"
+				title = "Линии"
+				url="http://46.137.184.237:6080/arcgis/rest/services/jsviewer/lines/FeatureServer/0" 
+				visible="true" 
+				legend="true"
+				list = "true" 
+				toc = "true"
+				tocLegend = "false"
+				token = ""
+				mode = "ONDEMAND"
+				definitionExpression = ""
+				outFields = "*"
+				dateFilter = "false"
+				snapping = "true"
+				>
+				
+				<tooltip
+					title   = "${name}"
+					content = "Цвет: ${color}"
+					opacity = "0.85"
+				/>
+				
+				<popup
+					title = "Линия"
+					showAttachments = "false">
+							
+					<fields>
+						<field
+							label = "Название"
+							name = "name"
+							visible = "true"
+						/>								
+						<field
+							label = "Цвет"
+							name = "color"
+							visible = "true"
+						/>								
+						<field
+							label = "Дата последнего изменения"
+							name = "edit_date"
+							visible = "true"
+							dateFormat = "dayShortMonthYear"
+						/>					
+					</fields>	
+					
+					<images>
+						<image
+							title = "Фотография"
+							field = "image"
+						/>
+					</images>
+				</popup>
+				
+				<edit>
+					<fields>
+						<field name = "name" label = "Название"/>
+						<field name = "color"  label = "Цвет"/>
+					</fields>					
+				</edit>		
 			</layer>
 				
 		</mapLayers>

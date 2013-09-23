@@ -60,6 +60,39 @@ dojo.require("dojo.fx");
 //other
 dojo.require("app.OAuthHelper");
 
+function ShowError (type, message)
+{
+	if (type == 0)
+	{
+		var title = "Ошибка при разборе config.xml.";
+	};
+	
+	if (type == 1)
+	{	
+		var title = "Ошибка при загрузке карты.";
+	};
+	
+	if (type == 2)
+	{
+		var title = 'Ошибка при загрузке слоя.';
+	};
+	
+	var errorDialog = new dijit.Dialog({
+		title: title,
+		content: message,	
+		style: "width: 300px; color: red"
+	});
+	
+	errorDialog.show();
+	
+	if (type != 2)
+	{
+		loadAppDialog.hide();
+	}
+	
+	window.close();
+}
+
 function startApp() 
 {
 	loadAppDialog =  new dijit.Dialog ({
@@ -92,1027 +125,1075 @@ function startApp()
 	
 	loadAppDialog.show();
 
-	try
+	if ( ! ParseConfig() )
 	{
-		LoadConfig();
-	}
-	catch (err)
-	{
-		errorDialog = new dijit.Dialog({
-			title: "Ошибка",
-			content: "Ошибка разбора конфигурационного файла. " + err.message + ' Приложение может работать неправильно.',			
-			style: "width: 300px; color: red"
-		});
-		
-		errorDialog.show();
-		loadAppDialog.hide();
-	};
-
-	if (config.portal != undefined)
-	{
-		try 
-		{
-			Authorize();
-		}
-		catch (err)
-		{
-			errorDialog = new dijit.Dialog({
-				title: "Ошибка",
-				content: "Ошибка при попытке авторизации на портале ArcGIS. " + err.message + ' Приложение может работать неправильно.',			 
-				style: "width: 300px; color: red"
-			});
-		
-			errorDialog.show();
-			loadAppDialog.hide();
-		};
+		exit;
 	}
 	
-
-	try 
-	{
-		Design();
-	}
-	catch (err)
-	{
-		errorDialog = new dijit.Dialog({
-			title: "Ошибка",
-			content: "Ошибка оформления главной страницы приложения." + err.message + ' Приложение может работать неправильно.',			 
-			style: "width: 300px; color: red"
-		});
-		
-		errorDialog.show();
-		loadAppDialog.hide();
-	};
+	Design();
 	
-	try
+	if (config.portal == undefined)
 	{
 		LoadMap();
 	}
-	catch (err)
+	else
 	{
-		errorDialog = new dijit.Dialog({
-			title: "Ошибка",
-			content: "Ошибка загрузки карты." + err.message + ' Приложение может работать неправильно.',			 
-			style: "width: 300px; color: red"
-		});
-		
-		errorDialog.show();
-		loadAppDialog.hide();
+		Authorize();
 	};
 }
 
-function LoadConfig()
+function ParseConfig()
 {
 	config  = new Object;
 	var xmlhttp = new XMLHttpRequest();
 	
 	esri.config.defaults.io.corsEnabledServers.push(location.protocol + '//' + location.host);
 	esri.config.defaults.io.corsEnabledServers.push("http://services.arcgis.com");
-	
+	esri.config.defaults.io.corsEnabledServers.push("https://services.arcgis.com");
+		
 	xmlhttp.open("GET","config.xml",false);
 	xmlhttp.send();
 	var xmlDoc=xmlhttp.responseXML;
 	
-	try
+	if (xmlDoc == null)
 	{
-		var _design = xmlDoc.getElementsByTagName("design");
-		var design = new Object;
-	
-		design.title = ((_design[0] == undefined) || (_design[0].getAttribute ('title') == undefined)) ? 'ArcGIS Viewer for JavaScript 1.0 beta' : _design[0].getAttribute ('title');
-		design.theme = ((_design[0] == undefined) || (_design[0].getAttribute ('theme') == undefined)) ? 'gray' : _design[0].getAttribute ('theme');
-	
-		if (_design[0] != undefined)
-		{
-			var _heading = _design[0].getElementsByTagName("heading");		
-		}
-		else
-		{
-			var _heading = undefined;
-		}
-
-		var heading = new Object;
-	
-		heading.type = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('type') == undefined)) ? 'image' : _heading[0].getAttribute('type');
-		heading.image = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('image') == undefined)) ? 'images/header.png' : _heading[0].getAttribute('image');
-		heading.fillimage = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('bcakground') == undefined)) ? 'images/background.png' : _heading[0].getAttribute('background');
-		heading.height = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('height') == undefined)) ? '63px' : _heading[0].getAttribute('height');
-		heading.caption = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('caption') == undefined)) ? 'ArcGIS Viewer for JavaScript 1.0 beta' : _heading[0].getAttribute('caption');
-		heading.fontsize = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-size') == undefined)) ? '35pt' : _heading[0].getAttribute('font-size');
-		heading.fontcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-color') == undefined)) ? '#FFFFFF' : _heading[0].getAttribute('font-color');
-		heading.bgcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('background-color') == undefined)) ? '#0000FF' : _heading[0].getAttribute('background-color');
-		heading.textalign = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('text-align') == undefined)) ? 'left' : _heading[0].getAttribute('text-align');	
-	
-		design.heading = heading;
-		config.design = design;
-	}
-	catch (err)
-	{
-		throw new AGSViewerException (101, 'Ошибка в секции [design].');
+		ShowError(0,'Файл config.xml не найден, пуст или содержит синтаксические ошибки. Приложение не будет запущено.');
+		exit;
 	}	
 	
-	try
-	{
-		var _portal = xmlDoc.getElementsByTagName ("portal");	
+	var _design = xmlDoc.getElementsByTagName("design");
+	var design = new Object;
 	
-		if (_portal[0] != undefined)
+	design.title = ((_design[0] == undefined) || (_design[0].getAttribute ('title') == undefined)) ? 'JavaScript Viewer for ArcGIS' : _design[0].getAttribute ('title');
+	design.theme = ((_design[0] == undefined) || (_design[0].getAttribute ('theme') == undefined)) ? 'gray' : _design[0].getAttribute ('theme');
+	
+	if (_design[0] != undefined)
+	{
+		var _heading = _design[0].getElementsByTagName("heading");		
+	}
+	else
+	{
+		var _heading = undefined;
+	}
+
+	var heading = new Object;
+	
+	heading.type = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('type') == undefined)) ? 'image' : _heading[0].getAttribute('type');
+	heading.image = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('image') == undefined)) ? 'images/header.png' : _heading[0].getAttribute('image');
+	heading.fillimage = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('bcakground') == undefined)) ? 'images/background.png' : _heading[0].getAttribute('background');
+	heading.height = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('height') == undefined)) ? '63px' : _heading[0].getAttribute('height');
+	heading.caption = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('caption') == undefined)) ? 'JavaScript Viewer for ArcGIS' : _heading[0].getAttribute('caption');
+	heading.fontsize = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-size') == undefined)) ? '35pt' : _heading[0].getAttribute('font-size');
+	heading.fontcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-color') == undefined)) ? '#FFFFFF' : _heading[0].getAttribute('font-color');
+	heading.bgcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('background-color') == undefined)) ? '#0000FF' : _heading[0].getAttribute('background-color');
+	heading.textalign = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('text-align') == undefined)) ? 'left' : _heading[0].getAttribute('text-align');	
+	design.heading = heading;
+	config.design = design;
+	
+	var _portal = xmlDoc.getElementsByTagName ("portal");
+
+	if (_portal[0] != undefined)
+	{
+		var portal            = new Object;
+		portal.url            = (_portal[0].getAttribute("url") == undefined) ? 'http://www.arcgis.com' : _portal[0].getAttribute("url");
+		portal.appID          = _portal[0].getAttribute("appID");
+		portal.expiration     = _portal[0].getAttribute("expiration");
+		portal.ssl            = _portal[0].getAttribute("ssl") == undefined ? true : _portal[0].getAttribute("ssl") == "true";
+		 
+		try
 		{
-			var portal            = new Object;
-			portal.url            = (_portal[0].getAttribute("url") == undefined) ? 'http://www.arcgis.com' : _portal[0].getAttribute("url");
-			portal.appId          = _portal[0].getAttribute("appID");
-			portal.expiration     = (_portal[0].getAttribute("expiration") == undefined) ? '60' : _portal[0].getAttribute("expiration");
-			portal.showPortalUser = (_portal[0].getAttribute("showPortalUser") == "true");
+			portal.expiration = parseInt (portal.expiration);
+		}
+		catch (err)
+		{
+			portal.expiration = 60;
+		}
 		
-			if (portal.appId == undefined)
+		portal.showPortalUser = (_portal[0].getAttribute("showPortalUser") == "true");
+		
+		if (portal.appID == undefined)
+		{
+			ShowError(0,'[portal]:не задан обязательный параметр appID.');
+			exit;
+		}
+		
+		config.portal = portal;
+	};
+
+	var _proxy = xmlDoc.getElementsByTagName("proxy");
+	
+	if (_proxy[0] != undefined)
+	{
+		esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("useproxy") == "true");
+		esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("proxyUrl") == undefined) ? 'proxy.ashx' : _proxy[0].getAttribute("proxyUrl");
+	}
+	
+	var _tasks = xmlDoc.getElementsByTagName("tasks");
+	var tasks = new Object;
+	
+	var _geometry = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("geometry") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("geometry");
+	tasks.geometry = new Object;
+	tasks.geometry.url = ((_geometry == undefined) || (_geometry[0] == undefined) || (_geometry[0].getAttribute("url") == undefined)) ? 'http://tasks.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer' : _geometry[0].getAttribute("url");
+	esri.config.defaults.geometryService = tasks.geometry.url;
+	geometryService = new esri.tasks.GeometryService(esri.config.defaults.geometryService);		
+
+	var _geocoder = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("geocoder") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("geocoder");
+	tasks.geocoder = new Object;
+	tasks.geocoder.url = ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("url") == undefined)) ? 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer' : _geocoder[0].getAttribute("url");	
+	tasks.geocoder.singleLineFieldName =  ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("singleLineFieldName") == undefined)) ? 'SingleLine' : _geocoder[0].getAttribute("singleLineFieldName");
+	tasks.geocoder.arcgisGeocoder = (tasks.geocoder.url.indexOf ('geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer') >= 0);
+
+	var _route = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("route") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("route");
+	tasks.route = new Object;
+	tasks.route.url = ((_route == undefined) || (_route[0] == undefined) || (_route[0].getAttribute("url") == undefined)) ? 'http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World' : _route[0].getAttribute("url");	
+	
+	var _print = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("print") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("print");
+	tasks.print = new Object;
+	tasks.print.url = ((_print == undefined) || (_print[0] == undefined) || (_print[0].getAttribute("url") == undefined)) ? 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task' : _print[0].getAttribute("url");	
+		
+	config.tasks = tasks;
+
+	var _dijits = xmlDoc.getElementsByTagName("dijits");
+	
+	if (_dijits[0] != undefined)
+	{
+		var dijits  = new Object;	
+		var _dijit  = _dijits[0].getElementsByTagName("dijit");
+	
+		dojo.forEach(_dijit, function (widget) 
+		{
+			if (widget.getAttribute("type") == "scalebar")
 			{
-				throw new AGSViewerException (1020, "Не задан обязательный параметр appID.");
+				dijits.scalebar = new Object;
 			}
 		
-			config.portal = portal;
-		};
-	}
-	catch (err)
-	{
-		if (err.code == 1020)
-		{
-			throw new AGSViewerException (102, 'Ошибка в секции [portal].' + ' ' + err.message);
-		}
-		else
-		{
-			throw new AGSViewerException (102, 'Ошибка в секции [portal].');
-		}
-	}
-
-	try
-	{
-		var _proxy = xmlDoc.getElementsByTagName("proxy");
-	
-		if (_proxy[0] != undefined)
-		{
-			esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("useproxy") == "true");
-			esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("proxyUrl") == undefined) ? 'proxy.ashx' : _proxy[0].getAttribute("proxyUrl");
-		}
-	}
-	catch (err)
-	{
-		throw new AGSViewerException (103, 'Ошибка в секции [proxy].');
-	}
-	
-	try
-	{
-		var _tasks = xmlDoc.getElementsByTagName("tasks");
-		var tasks = new Object;
-	
-		var _geometry = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("geometry") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("geometry");
-		tasks.geometry = new Object;
-		tasks.geometry.url = ((_geometry == undefined) || (_geometry[0] == undefined) || (_geometry[0].getAttribute("url") == undefined)) ? 'http://tasks.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer' : _geometry[0].getAttribute("url");
-		esri.config.defaults.geometryService = tasks.geometry.url;
-		geometryService = new esri.tasks.GeometryService(esri.config.defaults.geometryService);		
-
-		var _geocoder = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("geocoder") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("geocoder");
-		tasks.geocoder = new Object;
-		tasks.geocoder.url = ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("url") == undefined)) ? 'http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer' : _geocoder[0].getAttribute("url");	
-		tasks.geocoder.singleLineFieldName =  ((_geocoder == undefined) || (_geocoder[0] == undefined) || (_geocoder[0].getAttribute("singleLineFieldName") == undefined)) ? 'SingleLine' : _geocoder[0].getAttribute("singleLineFieldName");
-		tasks.geocoder.arcgisGeocoder = (tasks.geocoder.url.indexOf ('geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer') >= 0);
-
-		var _route = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("route") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("route");
-		tasks.route = new Object;
-		tasks.route.url = ((_route == undefined) || (_route[0] == undefined) || (_route[0].getAttribute("url") == undefined)) ? 'http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World' : _route[0].getAttribute("url");	
-	
-		var _print = ((_tasks[0] == undefined) || (_tasks[0].getElementsByTagName ("print") == undefined)) ? undefined : _tasks[0].getElementsByTagName ("print");
-		tasks.print = new Object;
-		tasks.print.url = ((_print == undefined) || (_print[0] == undefined) || (_print[0].getAttribute("url") == undefined)) ? 'http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task' : _print[0].getAttribute("url");	
-		
-		config.tasks = tasks;
-	}
-	catch (err)
-	{
-		throw new AGSViewerException (104, 'Ошибка в секции [tasks].');
-	}
-		
-	try
-	{
-		var _dijits = xmlDoc.getElementsByTagName("dijits");
-	
-		if (_dijits[0] != undefined)
-		{
-			var dijits  = new Object;	
-			var _dijit  = _dijits[0].getElementsByTagName("dijit");
-	
-			dojo.forEach(_dijit, function (widget) 
+			if (widget.getAttribute("type") == "print")
 			{
-				try
-				{
-					if (widget.getAttribute("type") == "scalebar")
-					{
-						dijits.scalebar = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1050, 'Ошибка в секции [scalebar].');
-				}
+				dijits.print = new Object;
+				dijits.print.title   = (widget.getAttribute("title") == undefined) ? 'JavaScript Viewer for ArcGIS' : widget.getAttribute("title");
+				dijits.print.owner   = (widget.getAttribute("owner") == undefined) ? 'Esri CIS' : widget.getAttribute("owner");
+			}
+				
+			if (widget.getAttribute("type") == "basemaps")
+			{
+				dijits.gallery = new Object;
+				dijits.gallery.arcgismaps = (widget.getAttribute("arcgismaps") == "true");
+				dijits.gallery.googlemaps = (widget.getAttribute("googlemaps") == "true");
+			}
 
-				try
-				{
-					if (widget.getAttribute("type") == "print")
-					{
-						dijits.print = new Object;
-						dijits.print.title   = (widget.getAttribute("title") == undefined) ? 'ArcGIS Viewer for JavaScript 1.0 beta' : widget.getAttribute("title");
-						dijits.print.owner   = (widget.getAttribute("owner") == undefined) ? 'Esri CIS' : widget.getAttribute("owner");
-					}
-				}
-				catch (err)
-				{	
-					throw new AGSViewerException (1051, 'Ошибка в секции [print.');
-				}
-				
+			if (widget.getAttribute("type") == "measure")
+			{
+				dijits.measure = new Object;
+			}
+
+			if (widget.getAttribute("type") == "overview")
+			{
+				dijits.overviewmap = new Object;
+			}
+
+			if (widget.getAttribute("type") == "geocoder")
+			{
+				dijits.geocoder = new Object;
+			}
+
+			if (widget.getAttribute("type") == "editor")
+			{
+				dijits.editor = new Object;
+				dijits.editor.toolbar = (widget.getAttribute("toolbar") == undefined) ? true : (widget.getAttribute("toolbar") == "true");
 			
-				try
+				if (dijits.editor.toolbar)
 				{
-					if (widget.getAttribute("type") == "basemaps")
-					{
-						dijits.gallery = new Object;
-						dijits.gallery.arcgismaps = (widget.getAttribute("arcgismaps") == "true");
-						dijits.gallery.googlemaps = (widget.getAttribute("googlemaps") == "true");
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1052, 'Ошибка в секции [basemaps].');
-				}
-			
-				try
-				{
-					if (widget.getAttribute("type") == "measure")
-					{
-						dijits.measure = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1053, 'Ошибка в секции [measure].');
-				}
-				
-				try
-				{
-					if (widget.getAttribute("type") == "overview")
-					{
-						dijits.overviewmap = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1054, 'Ошибка в секции [overview].');
-				}
-				
-				try
-				{		
-					if (widget.getAttribute("type") == "geocoder")
-					{
-						dijits.geocoder = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1055, 'Ошибка в секции [geocoder].');
-				}
-				
-				try
-				{
-					if (widget.getAttribute("type") == "editor")
-					{
-						dijits.editor = new Object;
-						dijits.editor.toolbar = (widget.getAttribute("toolbar") == undefined) ? true : (widget.getAttribute("toolbar") == "true");
-			
-						if (dijits.editor.toolbar)
-						{
-							var tools = widget.getElementsByTagName ("tools");
-							dijits.editor.tools = new Object;
-							dijits.editor.tools.undoRedoTool = ((tools[0] == undefined) || (tools[0].getAttribute("undo-redoTool") == undefined)) ? true : (tools[0].getAttribute("undo-redoTool") == "true");
+					var tools = widget.getElementsByTagName ("tools");
+					dijits.editor.tools = new Object;
+					dijits.editor.tools.undoRedoTool = ((tools[0] == undefined) || (tools[0].getAttribute("undo-redoTool") == undefined)) ? true : (tools[0].getAttribute("undo-redoTool") == "true");
 								
-							try
-							{
-								dijits.editor.tools.undoRedoMaxOperations = ((tools[0] == undefined) || (tools[0].getAttribute("undo-redoMaxOperations") == undefined)) ? 10 : parseInt (tools[0].getAttribute("undo-redoMaxOperations"))
-							}
-							catch (err)
-							{
-								throw new AGSViewerException (10560, 'Ошибка в параметре undo-redoMaxOperations.');
-							}								
+					try
+					{
+						dijits.editor.tools.undoRedoMaxOperations = tools[0] == undefined ? 10 : parseInt (tools[0].getAttribute("undo-redoMaxOperations"))
+					}
+					catch (err)
+					{
+						dijits.editor.tools.undoRedoMaxOperations = 10;						
+					}								
 								
-							dijits.editor.tools.mergeTool   = ((tools[0] == undefined) || (tools[0].getAttribute("mergeTool") == undefined)) ? true : (tools[0].getAttribute("mergeTool") == "true");
-							dijits.editor.tools.cutTool     = ((tools[0] == undefined) || (tools[0].getAttribute("cutTool") == undefined)) ? true : (tools[0].getAttribute("cutTool") == "true");
-							dijits.editor.tools.reshapeTool = ((tools[0] == undefined) || (tools[0].getAttribute("reshapeTool") == undefined)) ? true : (tools[0].getAttribute("reshapeTool") == "true");
+					dijits.editor.tools.mergeTool   = ((tools[0] == undefined) || (tools[0].getAttribute("mergeTool") == undefined)) ? true : (tools[0].getAttribute("mergeTool") == "true");
+					dijits.editor.tools.cutTool     = ((tools[0] == undefined) || (tools[0].getAttribute("cutTool") == undefined)) ? true : (tools[0].getAttribute("cutTool") == "true");
+					dijits.editor.tools.reshapeTool = ((tools[0] == undefined) || (tools[0].getAttribute("reshapeTool") == undefined)) ? true : (tools[0].getAttribute("reshapeTool") == "true");
 							
-							dijits.editor.tools.polygonDrawTools  = ((tools[0] == undefined) || (tools[0].getAttribute("polygonDrawTools") == undefined)) ? "POLYGON,FREEHAND_POLYGON,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE" : tools[0].getAttribute("polygonDrawTools");
-							dijits.editor.tools.polygonDrawTools = dijits.editor.tools.polygonDrawTools.split (',');				
+					dijits.editor.tools.polygonDrawTools  = ((tools[0] == undefined) || (tools[0].getAttribute("polygonDrawTools") == undefined)) ? "POLYGON,FREEHAND_POLYGON,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE" : tools[0].getAttribute("polygonDrawTools");
+					dijits.editor.tools.polygonDrawTools = dijits.editor.tools.polygonDrawTools.split (',');				
 
-							dijits.editor.tools.polylineDrawTools  = ((tools[0] == undefined) || (tools[0].getAttribute("polylineDrawTools") == undefined)) ? "POLYLINE,FREEHAND_POLYLINE,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE" : tools[0].getAttribute("polylineDrawTools");
-							dijits.editor.tools.polylineDrawTools = dijits.editor.tools.polylineDrawTools.split (',');				
-						}	
-					}	
-				}
-				catch (err)
-				{
-					if (error.code == 10560)
-					{					
-						throw new AGSViewerException (1056, 'Ошибка в секции [editor].' + ' ' + err.message);
-					}
-					else
-					{
-						throw new AGSViewerException (1056, 'Ошибка в секции [editor].');
-					}
-				}
-		
-				try
-				{
-					if (widget.getAttribute("type") == "bookmarks")
-					{
-						dijits.bookmarks = new Object;
-						dijits.bookmarks.bookmarks = [];
-						dijits.bookmarks.editable = (widget.getAttribute("editable") == undefined) ? true : widget.getAttribute("editable");
+					dijits.editor.tools.polylineDrawTools  = ((tools[0] == undefined) || (tools[0].getAttribute("polylineDrawTools") == undefined)) ? "POLYLINE,FREEHAND_POLYLINE,AUTOCOMPLETE,RECTANGLE,CIRCLE,TRIANGLE,ELLIPSE" : tools[0].getAttribute("polylineDrawTools");
+					dijits.editor.tools.polylineDrawTools = dijits.editor.tools.polylineDrawTools.split (',');				
+				}	
+			}
+
+			if (widget.getAttribute("type") == "bookmarks")
+			{
+				dijits.bookmarks = new Object;
+				dijits.bookmarks.bookmarks = [];
+				dijits.bookmarks.editable = (widget.getAttribute("editable") == undefined) ? true : widget.getAttribute("editable");
 					
-						var _bookmarks = widget.getElementsByTagName("bookmarks");
+				var _bookmarks = widget.getElementsByTagName("bookmarks");
 					
-						if (_bookmarks[0] != undefined)
+				if (_bookmarks[0] != undefined)
+				{
+					var _bookmark  = _bookmarks[0].getElementsByTagName("bookmark");
+					var item;
+					
+					if (_bookmark != undefined)
+					{
+						dojo.forEach(_bookmark, function (item) 
 						{
-							var _bookmark  = _bookmarks[0].getElementsByTagName("bookmark");
-							var item;
-					
-							if (_bookmark != undefined)
-							{
-								dojo.forEach(_bookmark, function (item) 
-								{
-									var bookmark = new Object;
-																		
-									bookmark.title = item.getAttribute("title");
+							var bookmark = new Object;
+							bookmark.title = item.getAttribute("title");
 									
-									if (bookmark.title == undefined)
-									{
-										throw new AGSViewerException (10570, 'Ошибка в элементе <bookmark>: не указан параметр title.');
-									}
-							
-									var _extent = item.getElementsByTagName("extent");
-							
-									if (_extent[0] != undefined)
-									{
-										bookmark.extent = new Object;
-										
-										bookmark.extent.xmin = _extent[0].getAttribute("xmin");
-										bookmark.extent.xmax = _extent[0].getAttribute("xmax");
-										bookmark.extent.ymin = _extent[0].getAttribute("ymin");
-										bookmark.extent.ymax = _extent[0].getAttribute("ymax");
-										
-										if (bookmark.extent.xmin == undefined)
-										{
-											throw new AGSViewerException (105710, 'Ошибка в элементе <bookmark>: не указан параметр xmin.');
-										}
-										
-										if (bookmark.extent.xmax == undefined)
-										{
-											throw new AGSViewerException (105711, 'Ошибка в элементе <bookmark>: не указан параметр xmax.');
-										}
-										
-										if (bookmark.extent.ymin == undefined)
-										{
-											throw new AGSViewerException (105712, 'Ошибка в элементе <bookmark>: не указан параметр ymin.');
-										}
-										
-										if (bookmark.extent.ymax == undefined)
-										{
-											throw new AGSViewerException (105713, 'Ошибка в элементе <bookmark>: не указан параметр ymax.');
-										}									
-								
-										dijits.bookmarks.bookmarks.push (bookmark);						
-									}
-									else
-									{
-										throw new AGSViewerException (10571, 'Ошибка в элементе <bookmark>: не указан параметр extent.');
-									}
-								});
+							if (bookmark.title == undefined)
+							{
+								ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]: Отсутствует обязательный параметр title.');
+								exit;
 							}
-						};
+							
+							var _extent = item.getElementsByTagName("extent");
+							
+							if (_extent[0] != undefined)
+							{
+								bookmark.extent = new Object;
+								
+								bookmark.extent.xmin = _extent[0].getAttribute("xmin");
+								bookmark.extent.xmax = _extent[0].getAttribute("xmax");
+								bookmark.extent.ymin = _extent[0].getAttribute("ymin");
+								bookmark.extent.ymax = _extent[0].getAttribute("ymax");
+								bookmark.extent.wkid = _extent[0].getAttribute("wkid");
+										
+								if (bookmark.extent.xmin == undefined)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр xmin.');
+									exit;
+								}
+								
+								try
+								{
+									bookmark.extent.xmin = parseFloat (bookmark.extent.xmin);									
+								}
+								catch (err)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра xmin задано неправильно.');
+									exit;
+								}
+										
+								if (bookmark.extent.xmax == undefined)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр xmax.');
+									exit;
+								}
+								
+								try
+								{
+									bookmark.extent.xmax = parseFloat (bookmark.extent.xmax);									
+								}
+								catch (err)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра xmax задано неправильно.');	
+									exit;
+								}
+										
+								if (bookmark.extent.ymin == undefined)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр ymin.');
+									exit;
+								}
+								
+								try
+								{
+									bookmark.extent.ymin = parseFloat (bookmark.extent.ymin);									
+								}
+								catch (err)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра ymin задано неправильно.');	
+									exit;
+								}
+										
+								if (bookmark.extent.ymax == undefined)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр ymax.');
+									exit;
+								}		
+
+								try
+								{
+									bookmark.extent.ymax = parseFloat (bookmark.extent.ymax);									
+								}
+								catch (err)
+								{
+									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра ymax задано неправильно.');
+									exit;
+								}		
+
+								try
+								{
+									bookmark.extent.wkid = parseInt (bookmark.extent.wkid);									
+								}
+								catch (err)
+								{
+									bookmark.extent.wkid = undefined;			
+								}
+								
+								dijits.bookmarks.bookmarks.push (bookmark);						
+							}
+							else
+							{
+								ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]: Отсутствует обязательная секция [extent].');
+								exit;
+							}
+
+						});
 					};
 				}
-				catch (err)
-				{
-					if ((err.code == 10570) || (err.code == 10571) || (err.code == 105710) || (err.code == 105711) || (err.code == 105712) || (err.code == 105713))
-					{
-						throw new AGSViewerException (1057, 'Ошибка в секции [bookmarks].' + ' ' + err.message);
-					}
-					else
-					{
-						throw new AGSViewerException (1057, 'Ошибка в секции [bookmarks].');
-					}
-				}
-				
-				try
-				{
-					if (widget.getAttribute("type") == "list")
-					{
-						dijits.list = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1058, 'Ошибка в секции [list].');
-				}
-				
-				try
-				{
-					if (widget.getAttribute("type") == "toc")
-					{
-						dijits.toc = new Object;
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1060, 'Ошибка в секции [toc].');
-				}
+			}
+
+			if (widget.getAttribute("type") == "toc")
+			{
+				dijits.toc = new Object;
+			}
+
+			if (widget.getAttribute("type") == "info")
+			{
+				dijits.details = new Object;
+				dijits.details.html = widget.getAttribute("html");
+			}
+
 			
-				try
-				{
-					if (widget.getAttribute("type") == "info")
-					{
-						dijits.details = new Object;
-						dijits.details.html = widget.getAttribute("html");
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1061, 'Ошибка в секции [info].');
-				}
-			
-				try
-				{
-					if (widget.getAttribute("type") == "identify")
-					{
-						dijits.identify = new Object;
-						dijits.identify.tolerance = widget.getAttribute("tolerance");
+			if (widget.getAttribute("type") == "identify")
+			{
+				dijits.identify = new Object;
+				dijits.identify.tolerance = widget.getAttribute("tolerance");
 						
-						try
-						{
-							dijits.identify.tolerance = parseInt (dijits.identify.tolerance);							
-						}
-						catch (err)
-						{
-							dijits.identify.tolerance = 10;
-						}
-					}
-				}
-				catch (err)
-				{
-					throw new AGSViewerException (1062, 'Ошибка в секции [identify].');
-				}
-			
 				try
 				{
-					if (widget.getAttribute("type") == "route")
-					{
-						dijits.route = new Object;
-						dijits.route.routeSymbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([50, 0, 255]), 3);
-					}
+					dijits.identify.tolerance = parseInt (dijits.identify.tolerance);							
 				}
 				catch (err)
 				{
-					throw new AGSViewerException (1063, 'Ошибка в секции [route].');
+					dijits.identify.tolerance = 10;
 				}
+			}
 			
+			if (widget.getAttribute("type") == "route")
+			{
+				dijits.route = new Object;
+				dijits.route.routeSymbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([50, 0, 255]), 3);
+			}
 				
-				try
+			if (widget.getAttribute("type") == "dateFilter")
+			{
+				dijits.dateFilter = new Object;
+				dijits.dateFilter.limits = (widget.getAttribute("limits") == undefined) ? 'single' : widget.getAttribute("limits");
+				dijits.dateFilter.field = widget.getAttribute("field");
+		
+				if (dijits.dateFilter.field == undefined)
 				{
-					if (widget.getAttribute("type") == "dateFilter")
-					{
-						dijits.dateFilter = new Object;
-						dijits.dateFilter.limits = (widget.getAttribute("limits") == undefined) ? 'single' : widget.getAttribute("limits");
-						dijits.dateFilter.field = widget.getAttribute("field");
-						
-						if (dijits.dateFilter.field == undefined)
-						{
-							throw new AGSViewerException (10641, 'Не задан параметр field.');
-						}
-					}
+					ShowError (0,'[dijits]:[dijit type = "dateFilter"]: Отсутствует обязательный параметр field.');
+					exit;
 				}
-				catch (err)
-				{	
-					if (err.code == 10641)
-					{
-						throw new AGSViewerException (1064, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
-					}
-					else
-					{
-						throw AGSViewerException (1064, 'Ошибка в секции [dateFielter].' + ' ' + err.message);
-					}
-				}
-			});
-		}
-		else
-		{
-			var dijits = undefined;
-		}
+			}
+
+		});
+	}
+	else
+	{
+		var dijits = undefined;
+	}
 	
-		config.widgets = dijits;
+	config.widgets = dijits;
+	
+	var map = new Object;
+	_map = xmlDoc.getElementsByTagName("map");
+		
+	if (_map[0] == undefined) 
+	{
+		ShowError (0,'Отсутствует обязательная секция [map].');
+		exit;
+	}
+	
+	_options = _map[0].getElementsByTagName ("options");
+	
+	var options = new Object;
+	options.wkid = _options[0] == undefined ? undefined : _options[0].getAttribute("wkid");
+	
+	try
+	{
+		options.wkid = parseInt (options.wkid);
 	}
 	catch (err)
 	{
-		throw new AGSViewerException (105, 'Ошибка в секции [dijits].' + ' ' + err.message);
+		options.wkid = undefined;
 	}
 	
-	// карта
-	var map = new Object;
-	_map = xmlDoc.getElementsByTagName("map");
-	_options = _map[0].getElementsByTagName ("options");
-	
-	// общие свойста карты
-	var options = new Object;
-	options.wkid = _options[0].getAttribute("wkid");
-	options.slider = _options[0].getAttribute("slider");
-	options.basemap = _options[0].getAttribute("basemap");
-	options.wrapAround180 = (_options[0].getAttribute("wrapAround180") == "true");
-	options.logoVisible = (_options[0].getAttribute("logoVisible") == "true");
-	options.attributionVisible = (_options[0].getAttribute("attributionVisible") == "true");
-	
-	var _extent = _options[0].getElementsByTagName ("extent");
-	
-	if (_extent[0] != undefined)
+	options.slider = ((_options[0] == undefined) || (_options[0].getAttribute('slider') == undefined)) ? 'small' : _options[0].getAttribute("slider");
+	options.basemap = (_options[0] == undefined) ? undefined : _options[0].getAttribute('basemap');
+	options.logoVisible = ((_options[0] == undefined) || (_options[0].getAttribute("logoVisible") == "undefined")) ? true : (_options[0].getAttribute("logoVisible") == 'true');
+	options.attributionVisible = ((_options[0] == undefined) || (_options[0].getAttribute("attributionVisible") == "undefined")) ? true : (_options[0].getAttribute("attributionVisible") == 'true');
+			
+	if (_options[0] != undefined)
 	{
-		var extent = new Object;
-		extent.xmin = _extent[0].getAttribute("xmin");
-		extent.xmax = _extent[0].getAttribute("xmax");
-		extent.ymin = _extent[0].getAttribute("ymin");
-		extent.ymax = _extent[0].getAttribute("ymax");
-		options.extent = extent;	
+		var _extent = _options[0].getElementsByTagName ("extent");
+	
+		if (_extent[0] != undefined)
+		{
+			var extent = new Object;
+			extent.xmin = _extent[0].getAttribute("xmin");
+				
+			if (extent.xmin == undefined)
+			{
+				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр xmin.');
+				exit;
+			}
+				
+			try
+			{
+				extent.xmin = parseFloat (extent.xmin);									
+			}
+			catch (err)
+			{
+				ShowError (0,'[map]:[options]:[extent]:Значение параметра xmin задано неправильно.');	
+				exit;
+			}
+						
+			extent.xmax = _extent[0].getAttribute("xmax");
+			
+			if (extent.xmax == undefined)
+			{
+				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр xmax.');
+				exit;
+			}		
+
+			try
+			{
+				extent.xmax = parseFloat (extent.xmax);									
+			}
+			catch (err)
+			{
+				ShowError (0,'[map]:[options]:[extent]:Значение параметра xmax задано неправильно.');
+				exit;
+			}
+						
+			extent.ymin = _extent[0].getAttribute("ymin");
+						
+			if (extent.ymin == undefined)
+			{
+				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр ymin.');
+				exit;
+			}
+			
+			try
+			{
+				extent.ymin = parseFloat (extent.ymin);									
+			}
+			catch (err)
+			{
+				ShowError (0,'[map]:[options]:[extent]:Значение параметра уmin задано неправильно.');		
+				exit;
+			}
+					
+			extent.ymax = _extent[0].getAttribute("ymax");
+						
+			if (extent.ymax == undefined)
+			{
+				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр ymax.');
+				exit;
+			}			
+
+			try
+			{
+				extent.ymax = parseFloat (extent.ymax);									
+			}
+
+			catch (err)
+			{
+				ShowError (0,'[map]:[options]:[extent]:Значение параметра ymax задано неправильно.');	
+				exit;
+			}
+						
+			options.extent = extent;	
+		}
 	}
 
 	map.options = options;	
-	
-	// базовые карты
-	_basemaps = _map[0].getElementsByTagName("basemaps");
-	_basemap  = _basemaps[0].getElementsByTagName("basemap");
-	
+		
 	map.basemaps = [];
-		
-	dojo.forEach(_basemap, function (item) 
+	_basemaps = _map[0].getElementsByTagName("basemaps");
+			
+	if (_basemaps[0] != undefined)
 	{
-		var basemap = new Object;
-		basemap.id   		= item.getAttribute("id");
-		basemap.title		= item.getAttribute("title");
-		basemap.visible 	= (item.getAttribute("visible") == "true");
-		basemap.gallery 	= item.getAttribute("basemapgallery");
-		basemap.galleryimg = item.getAttribute("basemapgalleryimg");
-		basemap.layers     = [];
-		
-		_layers = item.getElementsByTagName("layers");
-		_layer  = _layers[0].getElementsByTagName("layer");
-		
-		dojo.forEach(_layer, function (item1) 
-		{
-			var layer   = new Object;
-			layer.type    = item1.getAttribute("type");
-			layer.url     = item1.getAttribute("url");
-			layer.portalId = item1.getAttribute("portalId"); 
-			layer.token   = item1.getAttribute("token");
-			layer.opacity = item1.getAttribute("opacity");
-			layer.id      = item1.getAttribute("id");
-			layer.title   = item1.getAttribute("title");
-			layer.toc     = (item1.getAttribute("toc") == "true");
-			layer.tocSlider  = (item1.getAttribute("tocSlider") == "true");
-			basemap.layers.push (layer);
-		});
-
-		
-		map.basemaps.push (basemap);
-	})
+		_basemap  = _basemaps[0].getElementsByTagName("basemap");
+			
+		if (_basemap[0] != undefined)
+		{		
+			var item;
+			
+			dojo.forEach(_basemap, function (item) 
+			{
+				var basemap = new Object;
+							
+				basemap.id   		= item.getAttribute("id");
 	
-	
-	// операционные слои
+				if (basemap.id == undefined)
+				{
+					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр id.');
+					exit;
+				}
+							
+				basemap.title		= item.getAttribute("title");
+							
+				if (basemap.title == undefined)
+				{
+					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр title.');
+					exit;
+				}						
+							
+				basemap.image       = item.getAttribute("image");
+							
+				if (basemap.image == undefined)
+				{
+					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр image.');
+					exit;
+				}						
+							
+				basemap.layers     = [];
+							
+				_layers = item.getElementsByTagName("layers");
+							
+				if (_layers[0] == undefined)
+				{
+					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательная секция [layers].');
+					exit;
+				}
+							
+				_layer  = _layers[0].getElementsByTagName("layer");
+							
+				if (_layer[0] == undefined)
+				{
+					ShowError (0,'[map]:[basemaps]:[basemap]:[layers]: Отсутствует обязательная секция [layer].');
+					exit;
+				}
+				
+				var item1;
+				
+				dojo.forEach(_layer, function (item1) 
+				{
+					var layer   = new Object;
+					layer.type    = item1.getAttribute("type");
+										
+					if (layer.type == undefined)
+					{
+						ShowError (0,'[map]:[basemaps]:[basemap]:[layers]:[layer]: Отсутствует обязательный параметр type.');
+						exit;
+					}
+										
+					layer.url     = item1.getAttribute("url");
+					layer.portalID = item1.getAttribute("portalID"); 
+										
+					if ((layer.url == undefined) && (layer.portalID == undefined))
+					{
+						ShowError (0,'[map]:[basemaps]:[basemap]:[layers]:[layer]: Одновременно отсутствуют параметры url и portalID.');
+						exit;
+					}							
+										
+					layer.token   = item1.getAttribute("token");
+					layer.opacity = item1.getAttribute("opacity");
+					layer.id      = item1.getAttribute("id");
+					basemap.layers.push (layer);
+				});
+				
+				map.basemaps.push (basemap);
+			});
+		}
+	}
+			
 	var _opLayers = _map[0].getElementsByTagName("mapLayers");
+	
+	if (_opLayers[0] == undefined)
+	{
+		ShowError (0,'[map]: Отсутствует обязательная секция [mapLayers].');
+		exit;
+	}
+	
 	var _layer    = _opLayers[0].getElementsByTagName("layer");
 	
-	var edit  = new Object;
-	var popup = new Object;
+	if (_layer[0] == undefined)
+	{
+		ShowError (0,'[map]:[mapLayers]: Отсутствует обязательная секция [layer].');
+		exit;
+	}
 	
+	var edit  = new Object;
+	var popup = new Object;			
 	map.layers = [];
 	map.identifyLayers = [];
 	
+	var item;
+			
 	dojo.forEach(_layer, function (item) 
 	{
 		var layer = new Object;
 		layer.type     = item.getAttribute("type");
+		
+		if (layer.type == undefined)
+		{
+			ShowError (0,'[map]:[mapLayers]:[layer]: Отсутствует обязательный параметр type.');
+			exit;
+		}
+		
 		layer.id       = item.getAttribute("id");
+		
 		layer.url      = item.getAttribute("url");
-		layer.portalId = item.getAttribute("portalId"); 
-		layer.toc      = (item.getAttribute("toc") == "true");
-		layer.tocSlider  = (item.getAttribute("tocSlider") == "true");
-		layer.dateFilter = (item.getAttribute("dateFilter") == "true");
-		layer.visible  = item.getAttribute("visible");
+		layer.portalID = item.getAttribute("portalID"); 
+		
+		if ((layer.url == undefined) && (layer.portalID == undefined))
+		{
+			ShowError (0,'[map]:[mapLayers]:[layer]: Одновременно отсутствуют параметры url и portalID.');
+			exit;
+		}
+
+		layer.toc      = item.getAttribute("toc") == undefined ? true : item.getAttribute("toc") == "true";		
+		layer.tocSlider  = item.getAttribute("tocSlider") == undefined ? false : item.getAttribute("tocSlider") == "true";
+		layer.dateFilter = item.getAttribute("dateFilter") == undefined ? false : item.getAttribute("dateFilter") == "true"
+		layer.visible  = item.getAttribute("visible") == undefined ? true : item.getAttribute("visible") == "true";
 		layer.title    = item.getAttribute("title");
 		layer.token    = item.getAttribute("token");	
+		layer.opacity  = item.getAttribute("opacity");
 		
+		try
+		{
+			layer.opacity  = parseInt (layer.opacity );
+		}
+		catch (err)
+		{
+			layer.opacity = 1;
+		}
+				
 		if (layer.type == "dynamic")
 		{
 			var sublayers = [];
 			var flIdentify = false;
-			
-		
+					
 			_sublayers = item.getElementsByTagName ("sublayers");
-			
+					
 			if (_sublayers[0] != undefined)
 			{
 				var _sublayer = _sublayers[0].getElementsByTagName ("sublayer");
 				
-					
+				var item1;
+						
 				dojo.forEach (_sublayer, function (item1)
 				{
 					var sublayer = new Object;
 					sublayer.id = item1.getAttribute("id");
+					
+					try
+					{
+						sublayer.id = parseInt (sublayer.id);
+					}
+					catch (err)
+					{
+						ShowError (0,'[map]:[mapLayers]:[layer]:[sublayers]:[sublayer]:Параметр id задан неправильно (значение должно быть целым числом).');
+						exit;
+					}
+					
 					sublayer.definitionExpression = item1.getAttribute("definitionExpression");
-					sublayer.definitionExpressionSkipLogins = item1.getAttribute("definitionExpressionSkipLogins");
-					sublayer.visible = (item1.getAttribute("visible") == true);
-			
+					sublayer.visible = item1.getAttribute("visible") == undefined ? true : item1.getAttribute("visible") == "true";
+					sublayer.title = item1.getAttribute("title");
+				
 					var _popup         = item1.getElementsByTagName("popup");
-			
+					
+					
 					if (_popup[0] != undefined)
 					{
 						flIdentify = true;
-					
 						var popup = new Object;		
-						
-						popup.title     = _popup[0].getAttribute("title");
-						popup.description  = _popup[0].getAttribute("description");
-									
-						var _content           = _popup[0].getElementsByTagName("fieldInfos");
-						var _item2              = _content[0].getElementsByTagName("fieldInfo");					
 					
-						var fieldInfos = [];
-			
-						dojo.forEach(_item2, function(item2)
-						{
-							var fieldInfo = new Object;
-							fieldInfo.fieldName = item2.getAttribute("field");
-							fieldInfo.label = item2.getAttribute("label");
-							fieldInfo.format = item2.getAttribute("dateFormat");
-							
-							if (fieldInfo.format != undefined)
-							{
-								fieldInfo.format = {dateFormat : fieldInfo.format};
-							}
-							else
-							{
-							
-							fieldInfo.format = item2.getAttribute("numericFormat");
-							
-							if (fieldInfo.format != undefined)
-							{
-								fieldInfo.format = fieldInfo.format.split(',');
-								fieldInfo.format = {places : parseInt (fieldInfo.format[0]), digitalSeparator : fieldInfo.format[1] == "true"};
-							};};
-							
-							fieldInfo.visible = (item2.getAttribute("visible") == "true");
+						popup.title  = _popup[0].getAttribute("title");
 						
-							fieldInfos.push (fieldInfo);
-						})	
-
-						popup.fieldInfos = fieldInfos;
+						popup.content  = _popup[0].getAttribute("content");
 						
-						var _mediaInfos           = _popup[0].getElementsByTagName("mediaInfos");		
-
-						if (_mediaInfos[0] != undefined)
+						var _fields  = _popup[0].getElementsByTagName("fields");
+						
+						if (_fields[0] != undefined)
 						{
-							var _item3             = _mediaInfos[0].getElementsByTagName("mediaInfo");
-				
-							popup.mediaInfos = new Object;
-				
-							var mediaInfos = [];
-				
-							dojo.forEach(_item3, function(item2)
-							{
-								var mediaInfo = new Object;
-								mediaInfo.title = item2.getAttribute("title");
-								mediaInfo.caption = item2.getAttribute("caption");
-								mediaInfo.shortCaption = item2.getAttribute("shortCaption");
-								mediaInfo.type = item2.getAttribute("type");
-								mediaInfo.legend = (item2.getAttribute("legend") == "true");
-								mediaInfo.subtype = item2.getAttribute("subtype");
-								mediaInfo.value = new Object;
+							var _field  = _fields[0].getElementsByTagName("field");					
+							var item2;
+							var fields = [];
 					
-								if (mediaInfo.type == "image")
+							dojo.forEach(_field, function(item2)
+							{
+								var field = new Object;
+								field.fieldName = item2.getAttribute("name");
+								
+								if (field.fieldName == undefined)
 								{
-									mediaInfo.value.sourceUrl = item2.getAttribute("sourceUrl");
-									mediaInfo.value.linkUrl = item2.getAttribute("linkUrl");
+									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[fields]:[field]: Отсутствует обязательный параметр name.');
+									exit;
+								}
+								
+								field.label = item2.getAttribute("label");
+								field.format = item2.getAttribute("dateFormat");
+								field.visible = true;
+								
+								if (field.format != undefined)
+								{
+									field.format = {dateFormat : field.format};
 								}
 								else
 								{
-									mediaInfo.value.fields  = item2.getAttribute("fields").split(",");
+									field.format = item2.getAttribute("numericFormat");
 									
-									if (item2.getAttribute("labels") != undefined) 
+									if (field.format != undefined)
 									{
-										mediaInfo.xlabels = item2.getAttribute("labels").split(",");
-									}									
-								}
-	
-								mediaInfos.push (mediaInfo);
+										field.format = field.format.split(',');
+										
+										try
+										{	
+											field.format = {places : parseInt (field.format[0]), digitalSeparator : field.format[1] == "true"};
+										}
+										catch (err)
+										{
+											field.format = undefined;
+										}
+									};
+								};
+									
+								fields.push (field);
 							})	
-				
-							popup.mediaInfos.list = mediaInfos;
+
+							popup.fields = fields;
 						}
-						else
+								
+						var _charts           = _popup[0].getElementsByTagName("charts");		
+
+						if (_charts[0] != undefined)
 						{
-							popup.mediaInfos = null;
-						}	
-			
+							var _chart = _charts[0].getElementsByTagName("chart");
+							var item2;
+						
+							popup.charts = [];
+						
+							dojo.forEach(_chart, function(item2)
+							{
+								var chart = new Object;
+								chart.title = item2.getAttribute("title");
+								chart.type = item2.getAttribute("type") == undefined ? 'Lines' : item2.getAttribute("type");
+								chart.fields  = item2.getAttribute("fields");
+								
+								if (chart.fields == undefined)
+								{
+									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[charts]:[chart]: Отсутствует обязательный параметр fields.');
+									exit;
+								}
+								else
+								{
+									chart.fields = chart.fields.split(",");
+								}
+											
+								if (item2.getAttribute("labels") != undefined) 
+								{
+									chart.labels = item2.getAttribute("labels").split(",");
+								}									
+											
+								popup.charts.push (chart);
+							})	
+						};
+												
+						var _images = _popup[0].getElementsByTagName("images");		
+
+						if (_images[0] != undefined)
+						{
+							var _image  = _images[0].getElementsByTagName("image");
+							var item2;
+							popup.images = [];
+										
+							dojo.forEach(_item2, function(item2)
+							{
+								var image = new Object;
+								image.title = item2.getAttribute("title");
+								image.url = item2.getAttribute("url");
+								image.field  = item2.getAttribute("field");
+								
+								if ((image.url == undefined) && (image.field == undefined))
+								{
+									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[images]:[image]: Одновременно отсутствуют параметры url и field.');
+									exit;
+								}
+								
+								popup.images.push (image);
+							})	
+						}
+
 						sublayer.popup = popup;
-					}
-					else
-					{
-						sublayer.popup = null;
+						
 					}
 					
 					var _edit = item1.getElementsByTagName("edit");
-			
+					
 					if (_edit[0] != undefined)
 					{
 						var edit = new Object;
-						
+								
 						edit.featureServiceUrl = _edit[0].getAttribute ("featureServiceUrl");
-						var _fields = _edit[0].getElementsByTagName ("fields");
-						var _field = _fields[0].getElementsByTagName ("field");
-				
-						var fieldInfos = [];
-				
-						dojo.forEach(_field, function(item2)
+						
+						if (edit.featureServiceUrl == undefined)
 						{
-							var fieldInfo = new Object;
-							fieldInfo.fieldName = item2.getAttribute("name");
-							fieldInfo.label = item2.getAttribute("label");
-							fieldInfos.push (fieldInfo);
-						})	
-				
-						edit.fieldInfos = fieldInfos;
+							ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[edit]: Отсутствуют обязательный параметр featureServiceUrl.');
+							exit;
+						}
+						
+						var _fields = _edit[0].getElementsByTagName ("fields");
+						
+						if (_fields[0] != undefined)
+						{
+							var _field = _fields[0].getElementsByTagName ("field");							
+							var fields = [];
+							var item2;
+						
+							dojo.forEach(_field, function(item2)
+							{
+								var field = new Object;
+								field.fieldName = item2.getAttribute("name");
+								
+								if (field.fieldName == undefined)
+								{
+									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[edit]:[field]: Отсутствуют обязательный параметр name.');
+									exit;
+								}
+								
+								field.label = item2.getAttribute("label");
+								fields.push (field);
+							})	
+						
+							edit.fields = fields;
+						}
+						
 						sublayer.edit = edit;						
 					}
-					else
-					{	
-						sublayer.edit = null;
-					}
-			
+					
 					sublayers.push (sublayer);
 				});
-				
+						
 				if (flIdentify)
 				{
 					map.identifyLayers.push (layer);
 				}
-			
+					
 				layer.sublayers = sublayers;
 			}
-			else
-			{
-				layer.sublayers = null
-			}
 		}
-		else
-		{
-			layer.sublayers = null;
-		}
-				
+								
 		if (layer.type == "feature")
 		{
-			layer.mode = item.getAttribute("mode");	
-			layer.time = (item.getAttribute("time") == "true");
-			layer.expandTimeInfo = (item.getAttribute("expandTimeInfo") == "true");
-			layer.outFields = item.getAttribute("outFields").split(",");
-			layer.minScale = item.getAttribute("minScale");	
-			layer.maxScale = item.getAttribute("maxScale");	
-			layer.title = item.getAttribute("title");	
-			layer.title = item.getAttribute("title");	
-			layer.snapping = (item.getAttribute ("snapping") == "true");
-						
+			layer.mode = item.getAttribute("mode") == undefined ? 'ONDEMAND' : item.getAttribute("mode");
+			layer.outFields = item.getAttribute("outFields") == undefined ? ['*'] : item.getAttribute("outFields").split(",");
+			layer.snapping = item.getAttribute ("snapping") == undefined ? true : item.getAttribute ("snapping") == "true";
 			layer.definitionExpression = item.getAttribute("definitionExpression");
-			layer.event = item.getAttribute("event");
-			
+					
 			var _tooltip = item.getElementsByTagName ("tooltip");
-			
+				
 			if (_tooltip[0] != undefined)
 			{
 				var tooltip = new Object;		
 				tooltip.title   = _tooltip[0].getAttribute("title");
 				tooltip.content = _tooltip[0].getAttribute("content");
+				
+				if (tooltip.content == undefined)
+				{
+					ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[tooltip]: Отсутствуют обязательный параметр content.');
+					exit;
+				}
+			
 				tooltip.opacity = _tooltip[0].getAttribute("opacity");
+				
+				try
+				{
+					tooltip.opacity = parseFloat (tooltip.opacity);
+				}
+				catch (err)
+				{
+					tooltip.opacity = 1;
+				}
+				
 				layer.tooltip   = tooltip;
 			}
-			else
-			{
-				layer.tooltip = null;
-			}
-			
+					
 			var _popup = item.getElementsByTagName("popup");
 			
 			if (_popup[0] != undefined)
 			{
 				var popup = new Object;		
-				popup.title        = _popup[0].getAttribute("title");
-				popup.description  = _popup[0].getAttribute("description");
-				popup.showAttachments = (_popup[0].getAttribute("showAttachments") == "true");
-				popup.process   = _popup[0].getAttribute("process");
-				
-				popup.fieldInfos = null;
-				popup.mediaInfos = null;
-				
-				var _fieldInfos  = _popup[0].getElementsByTagName("fieldInfos");
-
-				if (_fieldInfos[0] != undefined)
-				{
-					var _item = _fieldInfos[0].getElementsByTagName("fieldInfo");					
-					
-					var fieldInfos = [];
-			
-					dojo.forEach(_item, function(item2)
-					{
-						var fieldInfo = new Object;
-						fieldInfo.fieldName = item2.getAttribute("field");
-						fieldInfo.label = item2.getAttribute("label");
-						fieldInfo.format = item2.getAttribute("dateFormat");
+				popup.title    = _popup[0].getAttribute("title");
+				popup.content  = _popup[0].getAttribute("content");
 						
-						if (fieldInfo.format != undefined)
+				var _fields  = _popup[0].getElementsByTagName("fields");
+
+				if (_fields[0] != undefined)
+				{
+					var _field  = _fields[0].getElementsByTagName("field");					
+					var item1;
+					var fields = [];
+					
+					dojo.forEach(_field, function(item1)
+					{
+						var field = new Object;
+						field.fieldName = item1.getAttribute("name");
+								
+						if (field.fieldName == undefined)
 						{
-							fieldInfo.format = {dateFormat : fieldInfo.format};
+							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature") :[popup]:[fields]:[field]: Отсутствует обязательный параметр name.');
+							exit;
+						}
+								
+						field.label = item1.getAttribute("label");
+						field.format = item1.getAttribute("dateFormat");
+						field.visible = true;
+								
+						if (field.format != undefined)
+						{
+							field.format = {dateFormat : field.format};
 						}
 						else
 						{
-							fieldInfo.format = item2.getAttribute("numericFormat");
+							field.format = item1.getAttribute("numericFormat");
 					
-							if (fieldInfo.format != undefined)
+							if (field.format != undefined)
 							{
-								fieldInfo.format = fieldInfo.format.split(',');
-								fieldInfo.format = {places : parseInt (fieldInfo.format[0]), digitalSeparator : fieldInfo.format[1] == "true"};
+								field.format = field.format.split(',');
+										
+								try
+								{	
+									field.format = {places : parseInt (field.format[0]), digitalSeparator : field.format[1] == "true"};
+								}
+								catch (err)
+								{
+									field.format = undefined;
+								}
 							};
 						};
 							
-						fieldInfo.visible = "true";
-						fieldInfos.push (fieldInfo);
-					})	
-				
-					popup.fieldInfos = fieldInfos;
-				}
-				else
-				{
-					popup.fieldInfos = [];
-				}
-				
-				var _mediaInfos           = _popup[0].getElementsByTagName("mediaInfos");		
-
-				if (_mediaInfos[0] != undefined)
-				{
-					var _item              = _mediaInfos[0].getElementsByTagName("mediaInfo");
-					popup.mediaInfos = new Object;
-					popup.mediaInfos.idField = _mediaInfos[0].getAttribute("idField");
-					popup.mediaInfos.dateField = _mediaInfos[0].getAttribute("dateField");
-					popup.mediaInfos.count = parseInt(_mediaInfos[0].getAttribute("count"));
-					popup.mediaInfos.format = _mediaInfos[0].getAttribute("format");
-					popup.mediaInfos.title = _mediaInfos[0].getAttribute("title");
-					popup.mediaInfos.points = 0;
-					popup.mediaInfos.intervals = 0;
-				
-					var mediaInfos = [];
-			
-					dojo.forEach(_item, function(item2)
-					{
-						var mediaInfo = new Object;
-						mediaInfo.title = item2.getAttribute("title");
-						mediaInfo.caption = item2.getAttribute("caption");
-						mediaInfo.shortCaption = item2.getAttribute("shortCaption");
-						mediaInfo.type = item2.getAttribute("type");
-						mediaInfo.legend = (item2.getAttribute("legend") == "true");
-						mediaInfo.subtype = item2.getAttribute("subtype");
-						mediaInfo.selection = item2.getAttribute("selection");
-						mediaInfo.compare = (item2.getAttribute("compare") == "true")
-												
-						if (mediaInfo.selection == "point")
-						{
-							popup.mediaInfos.points = popup.mediaInfos.points + 1;
-							
-							mediaInfo.value = new Object;
-				
-							if (mediaInfo.type == "image")
-							{
-								mediaInfo.value.sourceUrl = item2.getAttribute("sourceUrl");
-								mediaInfo.value.linkUrl = item2.getAttribute("linkUrl");
-							}
-							else
-							{
-								mediaInfo.value.fields = item2.getAttribute("y-fields").split(",");
+						fields.push (field);
+					})
 					
-								if (item2.getAttribute("x-labels") != undefined) 
-								{
-									mediaInfo.xlabels = item2.getAttribute("x-labels").split(",");
-								}	
-							}
-						}
-						else if (mediaInfo.selection == "interval")
-						{
-							popup.mediaInfos.intervals = popup.mediaInfos.intervals + 1;
-														
-							mediaInfo.yfield   = item2.getAttribute("y-field");
-							mediaInfo.dateField = item2.getAttribute("dateField");
-							mediaInfo.dateFieldFormat = item2.getAttribute("dateFieldFormat");
-							mediaInfo.idField = item2.getAttribute("idField");
-							mediaInfo.rowCount = item2.getAttribute("rowCount");
-						}
+					popup.fields = fields;					
+				}
 						
-						mediaInfos.push (mediaInfo);
-					})	
-			
-					popup.mediaInfos.list = mediaInfos;
-				}
-				else
-				{
-					popup.mediaInfos = null;
-				}
+				var _charts           = _popup[0].getElementsByTagName("charts");		
 
+				if (_charts[0] != undefined)
+				{
+					var chart  = _charts[0].getElementsByTagName("chart");
+					var item1;
+					popup.charts = [];
+					
+					dojo.forEach(chart, function(item1)
+					{
+						var chart = new Object;
+						chart.title = item1.getAttribute("title");
+						chart.type = item1.getAttribute("type") == undefined ? 'Lines' : item1.getAttribute("type");
+						chart.fields  = item1.getAttribute("fields");
+								
+						if (chart.fields == undefined)
+						{
+							ShowError (0,'[map]:[mapLayers]:[layer]:[popup]:[charts]:[chart]: Отсутствует обязательный параметр fields.');
+							exit;
+						}
+						else
+						{
+							chart.fields = chart.fields.split(",");
+						}
+											
+						if (item1.getAttribute("labels") != undefined) 
+						{
+							chart.labels = item1.getAttribute("labels").split(",");
+						}									
+											
+						popup.charts.push (chart);
+					})	
+				};
+						
+				var _images           = _popup[0].getElementsByTagName("images");		
+
+				if (_images[0] != undefined)
+				{
+					var _image  = _images[0].getElementsByTagName("image");
+					var item1;
+					popup.images = [];
+										
+					dojo.forEach(_image, function(item1)
+					{
+						var image = new Object;
+						image.title = item1.getAttribute("title");
+						image.url = item1.getAttribute("url");
+						image.field  = item1.getAttribute("field");
+								
+						if ((image.url == undefined) && (image.field == undefined))
+						{
+							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[popup]:[images]:[image]: Одновременно отсутствуют параметры url и field.');
+							exit;
+						}
+				
+						popup.images.push (image);
+					})	
+				};
+						
 				layer.popup = popup;
 			}
-			else
-			{
-				layer.popup = null;
-			}
-			
+
 			var _edit = item.getElementsByTagName("edit");
-			
+					
 			if (_edit[0] != undefined)
 			{
 				var edit = new Object;
 				var _fields = _edit[0].getElementsByTagName ("fields");
-				var _field = _fields[0].getElementsByTagName ("field");
 				
-				var fieldInfos = [];
-				
-				dojo.forEach(_field, function(item2)
+				if (_fields[0] != undefined)
 				{
-					var fieldInfo = new Object;
-					fieldInfo.fieldName = item2.getAttribute("name");
-					fieldInfo.label = item2.getAttribute("label");
-					fieldInfos.push (fieldInfo);
-				})	
-				
-				edit.fieldInfos = fieldInfos;
-				layer.edit = edit;
-			}
-			else
-			{
-				layer.edit = null;
-			}
-			
-			var _featureLabels = item.getElementsByTagName ("featureLabels");
-			
-			if ((_featureLabels[0] != undefined) && (layer.mode == "SNAPSHOT"))
-			{
-				var featureLabels = new Object;
-				featureLabels.field = _featureLabels[0].getAttribute("field");
-				featureLabels.offsetX = parseInt (_featureLabels[0].getAttribute("offsetX"));
-				featureLabels.offsetY = parseInt (_featureLabels[0].getAttribute("offsetY"));
-				
-				featureLabels.minScale = _featureLabels[0].getAttribute("minScale");
-				featureLabels.maxScale = _featureLabels[0].getAttribute("maxScale");
-				
-				var _font = _featureLabels[0].getElementsByTagName ("font");
-				
-				if (_font[0] != undefined)
-				{
-					featureLabels.font = new Object;
-					featureLabels.font.name = _font[0].getAttribute("name");
-					featureLabels.font.color = _font[0].getAttribute("color"); 
-					featureLabels.font.size = _font[0].getAttribute("size");
-					featureLabels.font.bold = (_font[0].getAttribute("bold") == "true");
-					featureLabels.font.italic = (_font[0].getAttribute("italic") == "true");
-				}
-				else
-				{
-					featureLabels.font = null;
+					var _field = _fields[0].getElementsByTagName ("field");
+					var item1;
+						
+					var fields = [];
+					
+					dojo.forEach(_field, function(item1)
+					{
+						var field = new Object;
+						field.fieldName = item1.getAttribute("name");
+							
+						if (field.fieldName == undefined)
+						{
+							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[edit]:[fields]:[field]: Отсутствуют обязательный параметр name.');
+							exit;
+						}
+							
+						field.label = item1.getAttribute("label");
+						fields.push (field);
+					})	
+						
+					edit.fields = fields;
 				}
 				
-				layer.featureLabels = featureLabels;
+				layer.edit = edit;									
 			}
-			else
-			{
-				layer.featureLabels = null;
-			}
-				
 		}
-		
+				
 		map.layers.push (layer);
 	})
 		
 	config.map = map;
-	
 	return true;
 }
 
 function Authorize ()
 {
 	OAuthHelper.init({
-		appId:      config.portal.appId,
+		appId:      config.portal.appID,
 		portal:     config.portal.url,
-		expiration: parseInt (config.portal.expiration),
+		expiration: config.portal.expiration,
 		popup:      false
 	});   
 
@@ -1129,17 +1210,26 @@ function Authorize ()
 function SignInPortal ()
 {
 	require(["esri/arcgis/Portal"], function(esriPortal) { 
-		new esriPortal.Portal("https://www.arcgis.com").signIn().then(
+		if ((config.portal.ssl) && (config.portal.url.indexOf ('https') < 0))
+		{
+			var urlhttps = config.portal.url.replace ("http", "https");
+		}
+		else
+		{
+			var urlhttps = config.portal.url;
+		}
+
+		new esriPortal.Portal(urlhttps).signIn().then(
 			function(portalUser)
 			{
-				config.portal.user = portalUser.fullName;
+				config.portal.user = portalUser.username;
 				config.portal.portal = portalUser.portal;
-				GetServiceUrls ();				
+				GetServiceUrls ();	
 			}
         ).otherwise(
 			function(error) 
 			{
-				throw new AGSViewerException (601, 'Ошибка при подключении к порталу.');
+				ShowError (1, 'Ошибка при подключении к порталу.');
 			}
         );
 	});
@@ -1151,14 +1241,14 @@ function GetServiceUrls ()
 	
 	for (var i = 0, counti = config.map.layers.length; i < counti; i++)
 	{		
-		if (((config.map.layers[i].url == null) || (config.map.layers[i].url == '')) && (config.map.layers[i].portalId != null) && (config.map.layers[i].portalId != ''))
+		if (((config.map.layers[i].url == null) || (config.map.layers[i].url == '')) && (config.map.layers[i].portalID != null) && (config.map.layers[i].portalID != ''))
 		{
 			if (i > 0)
 			{
 				q = q + ' OR ';
 			}
 			
-			q = q + 'id:' + config.map.layers[i].portalId;
+			q = q + 'id:' + config.map.layers[i].portalID;
 		}
 	}
 	
@@ -1176,13 +1266,16 @@ function GetItemUrls (items)
 	{
 		for (var j = 0; j < config.map.layers.length; j++)
 		{
-			if (config.map.layers[j].portalId == items.results[i].id)
+			if (config.map.layers[j].portalID == items.results[i].id)
 			{
 				config.map.layers[j].url = items.results[i].url;
 				break;
 			}
 		}
 	}
+
+	
+	LoadMap();
 }
 
 function Design()
@@ -1223,7 +1316,14 @@ function LoadMap()
 {	
 	if (config.map.options.extent != undefined)
 	{
-		var extent = new esri.geometry.Extent (parseInt (config.map.options.extent.xmin), parseInt (config.map.options.extent.ymin), parseInt (config.map.options.extent.xmax), parseInt (config.map.options.extent.ymax), new esri.SpatialReference({ wkid: parseInt(config.map.options.wkid) }));
+		if (config.map.options.wkid != undefined)
+		{
+			var extent = new esri.geometry.Extent (config.map.options.extent.xmin, config.map.options.extent.ymin, config.map.options.extent.xmax, config.map.options.extent.ymax, new esri.SpatialReference({ wkid: config.map.options.wkid}));
+		}
+		else
+		{
+			var extent = new esri.geometry.Extent (config.map.options.extent.xmin, config.map.options.extent.ymin, config.map.options.extent.xmax, config.map.options.extent.ymax);
+		}
 	}
 	else
 	{
@@ -1292,12 +1392,7 @@ function LoadMap()
 					if ((config.map.layers[i].sublayers[j].definitionExpression != undefined) && (config.map.layers[i].sublayers[j].definitionExpression.indexOf("$login") >= 0))
 					{
 						definitionExpressions[config.map.layers[i].sublayers[j].id] = definitionExpressions[config.map.layers[i].sublayers[j].id];
-						
-						if ((config.map.layers[i].sublayers[j].definitionExpressionSkipLogins != undefined) && (config.map.layers[i].sublayers[j].definitionExpressionSkipLogins != ''))
-						{
-							definitionExpressions[config.map.layers[i].sublayers[j].id] =  definitionExpressions[config.map.layers[i].sublayers[j].id] + "$skipLogins=" + config.map.layers[i].sublayers[j].definitionExpressionSkipLogins;
-						}
-						
+					
 					}
 										
 					if (config.map.layers[i].sublayers[j].edit != null)
@@ -1306,8 +1401,14 @@ function LoadMap()
 						{
 							featureSubLayer = new esri.layers.FeatureLayer(config.map.layers[i].sublayers[j].edit.featureServiceUrl,{
 								mode: esri.layers.FeatureLayer.MODE_SELECTION,
-								outFields: ["*"]
+								outFields:["*"],
+								definitionExpression : definitionExpressions[config.map.layers[i].sublayers[j].id]
 							});
+							
+							if (definitionExpressions[config.map.layers[i].sublayers[j].id] != undefined)
+							{
+								featureSubLayer.setDefinitionExpression (definitionExpressions[config.map.layers[i].sublayers[j].id]);
+							}
 							
 							map.editableLayerCount = map.editableLayerCount + 1;
 						}
@@ -1332,7 +1433,7 @@ function LoadMap()
 						})		
 						
 						featureSubLayer['edit'] = true;
-						featureSubLayer['editFieldInfos'] = config.map.layers[i].sublayers[j].edit.fieldInfos;
+						featureSubLayer['editFields'] = config.map.layers[i].sublayers[j].edit.fields;
 						
 						layers.push (featureSubLayer);
 						layer.featureSubLayers.push (featureSubLayer);
@@ -1362,8 +1463,18 @@ function LoadMap()
 			{
 				mode = esri.layers.FeatureLayer.MODE_SELECTION;
 			}		
-			
-			var layer = new esri.layers.FeatureLayer(url,{id : config.map.layers[i].id, visible: config.map.layers[i].visible, outFields: config.map.layers[i].outFields, mode: mode});	
+
+			var layer = new esri.layers.FeatureLayer(url,{
+				id : config.map.layers[i].id, 
+				visible: config.map.layers[i].visible, 
+				outFields: config.map.layers[i].outFields, 
+				mode: mode,
+				opacity : config.map.layers[i].opacity});	
+				
+			if (config.map.layers[i].definitionExpression != undefined)
+			{
+				layer.setDefinitionExpression (config.map.layers[i].definitionExpression);
+			};
 			
 			if (config.map.layers[i].popup != null) 
 			{
@@ -1371,6 +1482,7 @@ function LoadMap()
 				{
 					if (activeTool == 'identify')
 					{
+						map.infoWindow.clearFeatures();		
 						ShowFeatureLayerInfoWindow (evt);
 					}
 				})					
@@ -1422,7 +1534,7 @@ function LoadMap()
 			if (config.map.layers[i].edit != null)
 			{
 				layer ['edit'] = true;
-				layer ['editFieldInfos'] = config.map.layers[i].edit.fieldInfos;
+				layer ['editFields'] = config.map.layers[i].edit.fields;
 			}
 			
 			if (config.map.layers[i].featureLabels != null) 
@@ -1527,7 +1639,6 @@ function ShowFeatureLayerInfoWindow (evt)
 	
 	var layer = evt.graphic.getLayer();
 	var feature = evt.graphic;
-	
 	map.infoWindow.clearFeatures();
 	
 	for (var i = 0; i < config.map.layers.length; i++)
@@ -1553,7 +1664,7 @@ function OnMapClick(evt)
 {	
 	if (activeTool == 'edit')
 	{		
-		if (map.selectedLayers.length > 0)
+		if ((map.selectedLayers.length > 0) || (editorWidget._layer != null) && (editorWidget._activeTemplate == null))
 		{
 			editorWidget.drawingToolbar.deactivate();
 			
@@ -1573,12 +1684,17 @@ function OnMapClick(evt)
 		else
 		{
 			map.selectableLayerCount = 0;
-			editDialog.show();
+			
+			if (editorWidget._activeTemplate == null)
+			{
+				editDialog.show();
+			}
 		}
 	}
 	
 	if (activeTool == 'identify')
 	{
+		map.infoWindow.clearFeatures();			
 		identifyDialog.show();
 		
 		var tasks = dojo.map(config.map.identifyLayers, function(layer) 
@@ -1597,38 +1713,60 @@ function OnMapClick(evt)
 			function(res)
 			{
 				var results = [];
-				
+								
 				for (var i = 0; i < res.length; i++)
 				{
-					id	= config.map.identifyLayers[i].id;
-								
-					for (var j = 0, countj = config.map.layers.length; j < countj; j ++)
+					if (res[i][0] == true)
 					{
-						if (id == config.map.layers[j].id)
-						{
-							for (var k = 0; k < res[i][1].length; k++)
+						id	= config.map.identifyLayers[i].id;
+						
+						var layer = map.getLayer(id);
+						
+						if (layer.visible)
+						{								
+							for (var j = 0, countj = config.map.layers.length; j < countj; j ++)
 							{
-								sublayerID = res[i][1][k].layerId;
-							
-								for (var p = 0; p < config.map.layers[j].sublayers.length; p ++)
+								if (id == config.map.layers[j].id)
 								{
-									if (config.map.layers[j].sublayers[p].id == sublayerID)
+									for (var k = 0; k < res[i][1].length; k++)
 									{
-										var feature = res[i][1][k].feature;
-										var popup   = config.map.layers[j].sublayers[p].popup;									
-										BuildFeaturePopup (feature, popup);																		
-										results.push (feature);
-										break;
-									}							
+										var sublayerID = res[i][1][k].layerId;
+										
+										var sublayerVisible = false;
+										
+										for (var g = 0; g < layer.visibleLayers.length; g ++)
+										{
+											if (layer.visibleLayers[g] == sublayerID)
+											{
+												sublayerVisible = true;
+												break;
+											}
+										}
+										
+										if (sublayerVisible)
+										{								
+											for (var p = 0; p < config.map.layers[j].sublayers.length; p ++)
+											{
+												if (config.map.layers[j].sublayers[p].id == sublayerID)
+												{
+													var feature = res[i][1][k].feature;
+													var popup   = config.map.layers[j].sublayers[p].popup;	
+													BuildFeaturePopup (feature, popup);																		
+													results.push (feature);
+													break;
+												}							
+											}
+										}
+									}
+									
+									break;
 								}
 							}
-							
-							break;
 						}
 					}
 				}
-					
-				map.infoWindow.clearFeatures();				
+				
+				map.infoWindow.clearFeatures();		
 				
 				if ((lastClickedMapPoint != null) && (lastClickedMapPoint.x == evt.mapPoint.x) && (lastClickedMapPoint.y == evt.mapPoint.y) && (lastClickedMapPoint.spatialReference.wkid == evt.mapPoint.spatialReference.wkid) && (lostFeature != null))
 				{
@@ -1683,36 +1821,17 @@ function LayersAddedToMap (results)
 		}
 		else
 		{
-			errorDialog = new dijit.Dialog({
-				title: "Ошибка",
-				content: "Слой '" + results.layers[i].layer.title + "' не был добавлен на карту. Сервис не существует или недоступен." ,
-				style: "width: 300px; color: red"
-			});
-		
-			errorDialog.show();	
+			ShowError (2, "Слой '" + results.layers[i].layer.title + "' не был добавлен на карту. Сервис не существует или недоступен."); 
 		}
 	}
 	
 	ApplyLoginFilter();
-	
-	try
-	{
-		LoadWidgets();
-	}
-	catch (err)
-	{
-		errorDialog = new dijit.Dialog({
-			title: "Ошибка",
-			content: "Ошибка создания виджетов: </br>" + err.message ,
-			style: "width: 300px; color: red"
-		});
-	
-		errorDialog.show();
-	}
-	
+	LoadWidgets();
 	dijit.byId('outerContainer').resize();
 	loadAppDialog.hide();
 };
+
+
 
 function ApplyLoginFilter()
 {
@@ -1722,6 +1841,15 @@ function ApplyLoginFilter()
 		
 		if (layer.credential != undefined)
 		{
+			var login = layer.credential.userId;
+		}
+		else if (config.portal != undefined)
+			{
+				var  login = config.portal.user;
+			}
+			
+		if (login != undefined)
+		{		
 			if (layer.layerDefinitions != undefined)
 			{
 				for (j = 0; j < layer.layerDefinitions.length; j ++)
@@ -1729,30 +1857,22 @@ function ApplyLoginFilter()
 					if ((layer.layerDefinitions[j] != undefined) && (layer.layerDefinitions[j].indexOf("$login") >= 0))
 					{
 						layer.layerDefinitions[j] = layer.layerDefinitions[j].replace ('$login', "'" + layer.credential.userId + "'");
-						
-						n = layer.layerDefinitions[j].indexOf ("$skipLogins=");
-						
-						if ( n >= 0)
-						{
-							skipLoginsStr = layer.layerDefinitions[j].substring (n + 12, layer.layerDefinitions[j].length);
-							skipLoginsArr = skipLoginsStr.split(",");
-
-							if (skipLoginsArr.indexOf (layer.credential.userId) >= 0)
-							{
-								layer.layerDefinitions[j] = "";
-							}
-							else
-							{
-								layer.layerDefinitions[j] = layer.layerDefinitions[j].substring (0, n);
-							}	
-							layer.featureSubLayers[j].setDefinitionExpression (layer.layerDefinitions[j]);
-						}						
 					}
 				}
 				layer.setLayerDefinitions (layer.layerDefinitions);
 			}
+						
+			if (layer.type == "Feature Layer")
+			{
+				var defExpr = layer.getDefinitionExpression();
+				
+				if ((defExpr != undefined) && (defExpr.indexOf('$login') >=0))
+				{
+					defExpr = defExpr.replace ('$login', "'" + layer.credential.userId + "'");
+					layer.setDefinitionExpression (defExpr);
+				}
+			}
 		}
-		
 	}		
 }
 
@@ -1776,7 +1896,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (400, "Ошибка создания виджета редактирования.");
+			ShowError (1, "Ошибка создания виджета редактирования.");
 		}
 	}
 	else
@@ -1812,7 +1932,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (401, "Ошибка создания виджета измерений по карте.");
+			ShowError (1, "Ошибка создания виджета измерений по карте.");
 		}
 	}	
 	else
@@ -1828,7 +1948,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (402, "Ошибка создания виджета идентификации.");
+			ShowError (1, "Ошибка создания виджета идентификации.");
 		}
 	}	
 	else
@@ -1845,7 +1965,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (403, "Ошибка создания виджета геокодирования.");
+			ShowError (1, "Ошибка создания виджета геокодирования.");
 		}
 	}
 	else
@@ -1861,7 +1981,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (404, "Ошибка создания виджета прокладки маршрута.");
+			ShowError (1, "Ошибка создания виджета прокладки маршрута.");
 		}
 	}
 	else
@@ -1878,7 +1998,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (405, "Ошибка создания виджета печати.");
+			ShowError (1, "Ошибка создания виджета печати.");
 		}
 	}
 	else
@@ -1905,7 +2025,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (406, "Ошибка создания виджета выбора базовой карты.");
+			ShowError (1, "Ошибка создания виджета выбора базовой карты.");
 		}
 	}
 	else
@@ -1921,7 +2041,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (409, "Ошибка создания виджета таблицы содержания.");
+			ShowError (1, "Ошибка создания виджета таблицы содержания.");
 		}
 	}
 	else
@@ -1937,7 +2057,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (410, "Ошибка создания виджета закладок.");
+			ShowError (1, "Ошибка создания виджета закладок.");
 		}
 	}
 	else
@@ -1953,7 +2073,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (411, "Ошибка создания виджета дополнительной информации.");
+			ShowError (1, "Ошибка создания виджета дополнительной информации.");
 		}	
 	}
 	else
@@ -1970,7 +2090,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (412, "Ошибка создания виджета фильтрации объектов по дате.");
+			ShowError (1, "Ошибка создания виджета фильтрации объектов по дате.");
 		}
 	}	
 	else
@@ -1993,7 +2113,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (413, "Ошибка создания виджета масштабной линейки.");
+			ShowError (1, "Ошибка создания виджета масштабной линейки.");
 		}
 	}
 				
@@ -2005,7 +2125,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
-			throw new AGSViewerException (414, "Ошибка создания виджета обзорного окна карты.");
+			ShowError (1, "Ошибка создания виджета обзорного окна карты.");
 		}
 	}	
 
@@ -2053,7 +2173,7 @@ function AddRouteWidget()
 	
 	var routeDijit = new esri.dijit.Directions({
 		map: map,
-		alphabet: ["А" , "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х"],
+		alphabet:["А" , "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х"],
 		routeParams: {
 			directionsLanguage: "ru-RU",
 			returnRoutes: true
@@ -2163,7 +2283,7 @@ function AddBasemapGalleryWidget()
 				id     : config.map.basemaps[i].id,
 				layers : layers,
 				title  : config.map.basemaps[i].title,
-				thumbnailUrl : config.map.basemaps[i].galleryimg
+				thumbnailUrl : config.map.basemaps[i].image
 			});
 			
 			basemaps.push (basemap);
@@ -2292,15 +2412,23 @@ function AddBookmarksWidget()
 	
 	for (var i = 0; i < config.widgets.bookmarks.bookmarks.length; i ++)
 	{
-		var extent = new esri.geometry.Extent (parseInt (config.widgets.bookmarks.bookmarks[i].extent.xmin), 
-		                                       parseInt (config.widgets.bookmarks.bookmarks[i].extent.ymin), 
-											   parseInt (config.widgets.bookmarks.bookmarks[i].extent.xmax), 
-											   parseInt (config.widgets.bookmarks.bookmarks[i].extent.ymax), 
-											   map.spatialReference);
+		if (config.widgets.bookmarks.bookmarks[i].extent.wkid == undefined)
+		{
+			var sr = map.spatialReference;
+		}
+		else
+		{
+			var sr = new esri.SpatialReference({ wkid: config.widgets.bookmarks.bookmarks[i].extent.wkid})
+		}
+		
+		var extent = new esri.geometry.Extent (config.widgets.bookmarks.bookmarks[i].extent.xmin, 
+		                                       config.widgets.bookmarks.bookmarks[i].extent.ymin, 
+											   config.widgets.bookmarks.bookmarks[i].extent.xmax, 
+											   config.widgets.bookmarks.bookmarks[i].extent.ymax, 
+											   sr);
 											   
 		bookmarkItems.push ({name : config.widgets.bookmarks.bookmarks[i].title, extent: extent});
-	}
-	
+	}	
 		
 	var bookmarks = new esri.dijit.Bookmarks({
         map: map,
@@ -2365,14 +2493,13 @@ function createEditor()
 			layerInfos.push (
 				{
 					featureLayer : map.layers[i],
-					fieldInfos   : map.layers[i].editFieldInfos
+					fieldInfos   : map.layers[i].editFields
 				}
 			);
 			
 			tpLayerInfos.push (map.layers[i]);
 		}
 	}	
-	
 	
 	if (layerInfos.length > 0) 
 	{
@@ -2421,7 +2548,7 @@ function createEditor()
 		if ((config.widgets.editor.toolbar) && (config.widgets.editor.tools != null))
 		{
 		
-			var createOptions = {polylineDrawTools: [], polygonDrawTools: []};
+			var createOptions = {polylineDrawTools:[], polygonDrawTools:[]};
 		
 			for (var i = 0; i < config.widgets.editor.tools.polylineDrawTools.length; i ++)
 			{
@@ -2518,6 +2645,11 @@ function createEditor()
 		{
 			editorWidget.attributeInspector._currentFeature._graphicsLayer.applyEdits(null, [editorWidget.attributeInspector._currentFeature], null);    
 			editorWidget.drawingToolbar.deactivate();
+
+			if ((editorWidget._layer != null) && (editorWidget._layer.type == "Feature Layer"))
+			{
+				editorWidget._layer.clearSelection();
+			}
 			
 			map.infoWindow.hide();
 			
@@ -2995,122 +3127,146 @@ function displayPopupContent (feature)
         var content = feature.getContent();
         dijit.byId ('identifyPanelMain').set('content', content);
 		
-		for (var i = 0; i < feature.media.length; i ++)
+		for (var i = 0; i < feature.charts.length; i ++)
 		{
-			if (feature.media[i].type == "chart")
-			{
-				var titleDiv = dojo.create ("div");
-				titleDiv.innerHTML = "<hr><B>" + feature.media[i].chart.title + '</B></br></br>';
-				var chartDiv = dojo.create ("div", {region : "center"});
-				var legendDiv = dojo.create ("div", {region : "center"});
-				var chart = new dojox.charting.Chart(chartDiv);
-				chart.setTheme (dojox.charting.themes.Claro);
-				dijit.byId ('identifyPanelMain').domNode.appendChild (titleDiv);
-				dijit.byId ('identifyPanelMain').domNode.appendChild (chartDiv);
-				dijit.byId ('identifyPanelMain').domNode.appendChild (legendDiv);
+			var titleDiv = dojo.create ("div");
+			titleDiv.innerHTML = "<hr><B>" + feature.charts[i].title + '</B></br></br>';
+			var chartDiv = dojo.create ("div", {region : "center"});
+			var legendDiv = dojo.create ("div", {region : "center"});
+			var chart = new dojox.charting.Chart(chartDiv);
+			chart.setTheme (dojox.charting.themes.Claro);
+			dijit.byId ('identifyPanelMain').domNode.appendChild (titleDiv);
+			dijit.byId ('identifyPanelMain').domNode.appendChild (chartDiv);
+			dijit.byId ('identifyPanelMain').domNode.appendChild (legendDiv);
 				
-				chart.addPlot("default", {type: feature.media[i].chart.type, markers : true, labelOffset: -20});
+			chart.addPlot("default", {type: feature.charts[i].type, markers : true, labelOffset: -20});
 								
-				if (feature.media[i].chart.labels != [])
-				{
-					chart.addAxis("x", {labels : feature.media[i].chart.labels});
-				};
+			if (feature.charts[i].labels != [])
+			{
+				chart.addAxis("x", {labels : feature.charts[i].labels});
+			};
 				
-				chart.addAxis("y", {vertical: true, min: 0});
+			chart.addAxis("y", {vertical: true, min: 0});
 				
-				var tooltip = new dojox.charting.action2d.Tooltip(chart, "default");
+			var tooltip = new dojox.charting.action2d.Tooltip(chart, "default");
 				
-				if ((feature.media[i].chart.type == "Markers") || (feature.media[i].chart.type == "MarkersOnly"))
-				{
-					var mag = new dojox.charting.action2d.Magnify(chart, "default");
-				};
+			if ((feature.charts[i].type == "Markers") || (feature.charts[i].type == "MarkersOnly"))
+			{
+				var mag = new dojox.charting.action2d.Magnify(chart, "default");
+			};
 				
 			
-				if (feature.media[i].chart.type == "Columns")
-				{
-					var highlight = new dojox.charting.action2d.Highlight(chart, "default");
-				};
+			if (feature.charts[i].type == "Columns")
+			{
+				var highlight = new dojox.charting.action2d.Highlight(chart, "default");
+			};
 				
-				chart.addSeries("Series_" + i, feature.media[i].chart.series);				
+			chart.addSeries("Series_" + i, feature.charts[i].series);				
+			
+			chart.render();
 				
-				chart.render();
-				
-				if (feature.media[i].chart.type == "Pie")
-				{
-					var msl = new dojox.charting.action2d.MoveSlice(chart,"default");
-					var legend = new dojox.charting.widget.Legend({ chart: chart }, legendDiv);
-				}
+			if (feature.charts[i].type == "Pie")
+			{
+				var msl = new dojox.charting.action2d.MoveSlice(chart,"default");
+				var legend = new dojox.charting.widget.Legend({ chart: chart }, legendDiv);
 			}
 		}
 		
+		for (var i = 0; i < feature.images.length; i ++)
+		{
+			var titleDiv = dojo.create ("div");
+			titleDiv.innerHTML = "<hr><B>" + feature.images[i].title + '</B></br></br>';
+			var img = document.createElement("img");
+			img.setAttribute ("src", feature.images[i].url);
+			dojo.style (img, "display", "block");
+			dijit.byId ('identifyPanelMain').domNode.appendChild (titleDiv);
+			dijit.byId ('identifyPanelMain').domNode.appendChild (img);			
+		}
+		
 		dijit.byId ('identifyPanelMain').resize();
+		dijit.byId ('tools').resize();
 	}
 }			
 
 function BuildFeaturePopup (feature, popup)
 {
-	if (popup.fieldInfos.length == 0)
+	if ((popup.fields == undefined) || (popup.fields.length == 0))
 	{
 		var template = new esri.dijit.PopupTemplate({
 			title: popup.title,
-			description: popup.description
+			description: popup.content
 		});
 	}
 	else
 	{
 		var template = new esri.dijit.PopupTemplate({
 			title: popup.title,
-			fieldInfos: popup.fieldInfos 
+			fieldInfos: popup.fields
 		});
 	}
 	
-	if ( popup.mediaInfos != null)
-	{
-		feature['media'] = [];
-		
-		for (var m = 0; m < popup.mediaInfos.list.length; m ++)
+	feature['charts'] = [];
+	
+	if ( popup.charts != undefined)
+	{		
+		for (var m = 0; m < popup.charts.length; m ++)
 		{
-			var mediaInfo = popup.mediaInfos.list[m];
-			var media = new Object;
-			media.chart = new Object;
-			media.type = "chart";
-			media.chart.type  = mediaInfo.subtype;
-			media.chart.title = mediaInfo.title;
+			var chart = new Object;
+			chart.type  = popup.charts[m].type;
+			chart.title = popup.charts[m].title;
 			var labels = [];
 			var series = [];
 													
-			for (f = 0; f < mediaInfo.value.fields.length; f ++)
+			for (f = 0; f < popup.charts[m].fields.length; f ++)
 			{
-				if (feature.attributes[mediaInfo.value.fields[f]] != null)
+				if (feature.attributes[popup.charts[m].fields[f]] != null)
 				{
-					series.push ({y: parseInt (feature.attributes[mediaInfo.value.fields[f]]), legend : mediaInfo.xlabels[f], tooltip : mediaInfo.xlabels[f] + ' : ' + feature.attributes[mediaInfo.value.fields[f]]});
+					series.push ({y: parseInt (feature.attributes[popup.charts[m].fields[f]]), legend : popup.charts[m].labels[f], tooltip : popup.charts[m].labels[f] + ' : ' + feature.attributes[popup.charts[m].fields[f]]});
 												
-					if (mediaInfo.xlabels != undefined)
+					if (popup.charts[m].labels != undefined)
 					{
-						labels.push ({value: f + 1 , text : mediaInfo.xlabels[f]});
+						labels.push ({value: f + 1 , text : popup.charts[m].labels[f]});
 					}
 				}
 				else
 				{
 					series.push ({y: 0, tooltip: "Нет данных"});
 													
-					if (mediaInfo.xlabels != undefined)
+					if (popup.charts[m].labels != undefined)
 					{
-						labels.push ({value: f + 1, text : mediaInfo.xlabels[f] + " (н/д)"});
+						labels.push ({value: f + 1, text : popup.charts[m].labels[f] + " (н/д)"});
 					}
 				}
 			}		
 
-			media.chart.series = series;
-			media.chart.labels = labels;													
-			feature.media.push (media);
+			chart.series = series;
+			chart.labels = labels;													
+			feature.charts.push (chart);
 		}
-	}
-	else
-	{
-		feature.media = [];
-	}
+	};
+	
+	feature['images'] = [];
+	
+	if ( popup.images != undefined)
+	{		
+		for (var m = 0; m < popup.images.length; m ++)
+		{
+			var image = new Object;
+			image.title = popup.images[m].title;
 			
+			if (popup.images[m].field != undefined) 
+			{
+				image.url = feature.attributes[popup.images[m].field];
+			}
+			else
+			{
+				image.url = popup.images[m].url;
+			}
+															
+			feature.images.push (image);
+		}
+	};
+	
 	feature.setInfoTemplate(template);
 }
 

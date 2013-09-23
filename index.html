@@ -74,7 +74,7 @@
 				var dojoConfig = {
 					parseOnLoad: true,
 					packages:[					
-						{name:"app", location: location.pathname.replace(/\/[^/]+$/, '') + '/javascript'},
+						{name:"app", location: location.pathname.replace(/\/[^/]+$/, '') + '/main'},
 						{name:"agsjs",location:'http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/src/agsjs'}
 					]
 				};
@@ -86,7 +86,7 @@
 		</script>
 		
 		<script src="http://js.arcgis.com/3.6/"></script>
-		<script type="text/javascript" src="javascript/main.js"></script>
+		<script type="text/javascript" src="main/main.js"></script>
 		
 		<script type="text/javascript">
 			var loading;
