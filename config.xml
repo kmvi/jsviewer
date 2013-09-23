@@ -62,8 +62,8 @@
 		<dijit type="overview"/>	
 		
 		<dijit type = "print"
-			   title = "ArcGIS Viewer for JavaScript 1.0 beta"
-			   owner = "ESRI CIS"/>
+			   title = "JavaScript Viewer for ArcGIS"
+			   owner = "Esri CIS"/>
 		
 		<dijit type="route"/>
 					
