@@ -62,7 +62,7 @@
 
 			<print> – секция описания сервиса экспорта карты в веб-файл PDF или PNG. Необязательная секция.
 			Параметры:
-				url - REST URL сервиса экспорта карты. Необязательный параметр. Значение по умолчанию - "http://sampleserver6.arcgisonline.com/arcgis/rest/directories/arcgisoutput/Utilities/PrintingTools_GPServer/Utilities_PrintingTools" (сервис экспорта карты ArcGIS Online).
+				url - REST URL сервиса экспорта карты. Необязательный параметр. Значение по умолчанию - "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task" (сервис экспорта карты ArcGIS Online).
 
 				
 <dijits> -	Секция виджетов. Необязательная секция. Секцмя состоит из одной или нескольких секций [dijit]. Каждая секцмя <dijit> определяет виджет, который будет использован в веб-приложении.
