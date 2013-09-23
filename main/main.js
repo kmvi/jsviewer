@@ -1379,6 +1379,7 @@ function LoadMap()
 		if (config.map.layers[i].type == "dynamic")
 		{
 			var layer = new esri.layers.ArcGISDynamicMapServiceLayer(url,{id : config.map.layers[i].id, visible: config.map.layers[i].visible, opacity : config.map.layers[i].opacity });
+			
 			layer['featureSubLayers'] = [];
 						
 			if (config.map.layers[i].sublayers != null)
@@ -1405,6 +1406,9 @@ function LoadMap()
 								definitionExpression : definitionExpressions[config.map.layers[i].sublayers[j].id]
 							});
 							
+							featureSubLayer['parentLayer'] = layer;
+							featureSubLayer['subLayerID']  = config.map.layers[i].sublayers[j].id;
+							
 							if (definitionExpressions[config.map.layers[i].sublayers[j].id] != undefined)
 							{
 								featureSubLayer.setDefinitionExpression (definitionExpressions[config.map.layers[i].sublayers[j].id]);
@@ -1418,18 +1422,28 @@ function LoadMap()
 						
 						dojo.connect (featureSubLayer, "onSelectionComplete", function (features,selectionMethod)
 						{
-							if (features.length > 0)						
+							var subLayerID = parseInt (featureSubLayer.subLayerID);
+							console.log (subLayerID);
+							console.log (featureSubLayer.parentLayer.visibleLayers);
+							
+							if (featureSubLayer.parentLayer.visibleLayers.indexOf (subLayerID) >= 0)
 							{
-								map.selectedLayers.push (features[0].getLayer());
-							}		
+								if (features.length > 0)						
+								{
+									map.selectedLayers.push (features[0].getLayer());
+								}	
+							}
+							else
+							{
+								featureSubLayer.clearSelection();
+							};
 
 							map.selectableLayerCount = map.selectableLayerCount + 1;
 							
 							if (map.selectableLayerCount == map.editableLayerCount)
 							{
 								editDialog.hide();
-							}
-						
+							}					
 						})		
 						
 						featureSubLayer['edit'] = true;
