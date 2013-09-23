@@ -42,7 +42,7 @@
 		</dijit>
 		
 		<dijit type="info"
-         	    html = "Разработка компании &lt;a href = &quot;http://www.esri-cis.ru&quot; target = &quot;_blank&quot; &gt;Esri CIS&lt;/a&gt;.&lt;/br&gt;&lt;/br&gt; Версия 1.0 (сборка 05.07.2013).&lt;/br&gt;&lt;/br&gt;&lt;a href = &quot;help.docx&quot; target = &quot;_blank&quot; &gt;&lt;B&gt;Загрузить справку.&lt;/&gt;&lt;/a&gt;"/>
+         	    html = "Разработка компании &lt;a href = &quot;http://www.esri-cis.ru&quot; target = &quot;_blank&quot; &gt;Esri CIS&lt;/a&gt;.&lt;/br&gt;&lt;/br&gt; Версия 1.0 (сборка 23.09.2013).&lt;/br&gt;&lt;/br&gt;&lt;a href = &quot;help.docx&quot; target = &quot;_blank&quot; &gt;&lt;B&gt;Загрузить справку.&lt;/&gt;&lt;/a&gt;"/>
 		
 		<dijit type="geocoder" />
 			   
