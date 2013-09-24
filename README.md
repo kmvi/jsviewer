@@ -5,9 +5,13 @@ JavaScript Viewer for ArcGIS - конфигурироемое веб-приложение, предназначенное д
 
 Концепция
 
-	Несмотря на то, что для разработки веб-приложений на платформе ArcGIS используются ArcGIS API for JavaScript, ArcGIS API for Flex и ArcGIS API for Silverlight, готовые настраиваемые веб-приложения существуют только для Flex и Silverlight. Готового настраиваемого веб-приложения на основе ArcGIs API for JavaScript не было. При этом существует возможность скачивания с сайта arcgis.com шаблона веб-приложения JavaScript, но шаблон настроен на работу с ArcGIS Online. Без программной доработки шаблона невозможно напрямую работать с веб-сервисами ArcGIS for Server, не зарегистрированными в ArcGIS Online или на Portal for ArcGIS: пользователю требуется создать карту в ArcGIS Online, и шаблон будет содержать ссылку на идентификатор этой карты в ArcGIS Online - webmapid. 
+	Несмотря на то, что для разработки веб-приложений на платформе ArcGIS используются ArcGIS API for JavaScript, ArcGIS API for Flex и ArcGIS API for Silverlight, готовые настраиваемые веб-приложения существуют только для Flex и Silverlight. 
+	Готового настраиваемого веб-приложения на основе ArcGIs API for JavaScript не было. 
+	При этом существует возможность скачивания с сайта arcgis.com шаблона веб-приложения JavaScript, но шаблон настроен на работу с ArcGIS Online. 
+	Без программной доработки шаблона невозможно напрямую работать с веб-сервисами ArcGIS for Server, не зарегистрированными в ArcGIS Online или на Portal for ArcGIS: пользователю требуется создать карту в ArcGIS Online, и шаблон будет содержать ссылку на идентификатор этой карты в ArcGIS Online - webmapid. 
 
-	Новый JavaScript Viewer for ArcGIS с помощью конфигурационного файла может быть настроен как на работу с веб-сервисами ArcGIS for Server напрямую (т.е. с помощью указания REST-url сервисов, как в ArcGIS Viewer for JavaScript, так и в ArcGIS Viewer for Silverlight). При этом можно указывать и идентификаторы зарегистрированных веб-сервисов в ArcGIS Online и Portal for ArcGIS. 
+	Новый JavaScript Viewer for ArcGIS с помощью конфигурационного файла может быть настроен как на работу с веб-сервисами ArcGIS for Server напрямую (т.е. с помощью указания REST-url сервисов, как в ArcGIS Viewer for JavaScript, так и в ArcGIS Viewer for Silverlight). 
+	При этом можно указывать и идентификаторы зарегистрированных веб-сервисов в ArcGIS Online и Portal for ArcGIS. 
 	
 	При желании JavaScript Viewer for ArcGIS может быть самостоятельно доработан. 
 	Для установки вьюера необходимо скачать исходники и разместить их на своем веб-сервере.
