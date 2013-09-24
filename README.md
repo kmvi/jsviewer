@@ -77,4 +77,5 @@ JavaScript Viewer for ArcGIS - конфигурироемое веб-приложение, предназначенное д
 	При отображении карт Google Maps библиотека agsjs используется JavaScript API Google карт. Существуют ограничения на использование JavaScript API Google карт.
 
 Поддерживаемые браузеры 
+
 	Поддерживаются ровно те же браузеры, что и браузеры, поддерживаемые ArcGIS API for JavaScript.
