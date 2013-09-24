@@ -51,19 +51,22 @@ JavaScript Viewer for ArcGIS - конфигурироемое веб-приложение, предназначенное д
 Использование библиотеки ArcGIS API for JavaScript 
        
 	Веб-приложение ArcGIS API for JavaScript построено на библиотеке ArcGIS API for JavaScript. 
-	О том, как подключить библиотеку ArcGIS API for JavaScript, можно прочесть здесь.
+	О том, как подключить библиотеку ArcGIS API for JavaScript, можно прочесть здесь: https://developers.arcgis.com/en/javascript/jshelp/intro_accessapi.html.
 	При работе в корпоративной сети без Интернет-подключения необходимо скачать библиотеку ArcGIS API for JavaScript, установить ее и дать соответствующие ссылки из файла index.html.
-	Использование ArcGIS API for JavaSctipt регламентируется лицензионным соглашением.
+	Использование ArcGIS API for JavaSctipt регламентируется лицензионным соглашением: https://developers.arcgis.com/en/javascript/jshelp/terms.html.
 
-Использование базовых карт и сервисов ArcGIS Online       
-	Использование базовых карт и сервисов ArcGIS Online регламентируется лицензионным соглашением.
-	Пункты лицензионного соглашения, касающиеся использования базовых карт и серсисов ArcGIS Online, достунпым языком изложены здесь.
+Использование базовых карт и сервисов ArcGIS Online  
+     
+	Использование базовых карт и сервисов ArcGIS Online регламентируется лицензионным соглашением: http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf.
+	Пункты лицензионного соглашения, касающиеся использования базовых карт и серсисов ArcGIS Online, достунпым языком изложены здесь: http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf.
 
-Использование сторонних библиотек                     
-	Веб-приложение JavaScript Viewer for ArcGIS использует стороннюю библиотеку agsjs.
+Использование сторонних библиотек  
+                   
+	Веб-приложение JavaScript Viewer for ArcGIS использует стороннюю библиотеку agsjs: http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs.
 
 	Библиотека ajsjs используется для отображение виджета списка слоев и легенды (секция <toc> в config.xml) и для отображения базовой карты Google Maps и выбора базовой карты Google Maps в виджете выбора базовой карты (секция <dijit type = "basemaps">),
 	Непосредственно в приложении используются следующие классы библиотеки: 
+	
 		agsjs.dijit.TOC для отображения виджета списка слоев и легенды;
 		agsjs.layers.GoogleMapsLayer для отображения карты Google Maps и выбора их в виджете выбора базовой карты.
 	
