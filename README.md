@@ -60,7 +60,7 @@ Copyright 2013 Esri CIS
 
 ##Использование сторонних библиотек
 Приложение использует дополнительные сторонние библиотеки:
-* [ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/), [лицензионное соглашение]()
+* [ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/), [лицензионное соглашение](https://developers.arcgis.com/en/javascript/jshelp/terms.html)
 * [gmaps-utility-gis](https://code.google.com/p/gmaps-utility-gis/), [лицензия Apache License, версия 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 ##Использование сторонних ресурсовы
