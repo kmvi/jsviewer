@@ -65,6 +65,7 @@ Copyright 2013 Esri CIS
 
 ##»спользование сторонних ресурсовы
 ѕриложение может использовать сторонние ресурсы:
-* [Ѕазовые карты ArcGIS Online](), ([соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf))
-* [јналитические сервисы ArcGIS Online](http://resources.arcgis.com/en/communities/arcgis-content/029700000044000000.htm#s=0&n=30&d=1&md=acomt-online:00001), ([соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf))
-*  арты Google Maps, [соглашение об использовании JavaScript API Google  арт] (https://developers.google.com/maps/documentation/javascript/usage?hl=ru)
+* [Ѕазовые карты ArcGIS Online](http://resources.arcgis.com/en/communities/arcgis-content/029700000044000000.htm#s=0&n=30&d=1&md=acomt-online:10000) ([соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf))
+* [јналитические сервисы ArcGIS Online](http://resources.arcgis.com/en/communities/arcgis-content/029700000044000000.htm#s=0&n=30&d=1&md=acomt-online:00001) ([соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf))
+* [ арты Google Maps] (https://maps.google.com/) ([соглашение об использовании JavaScript API Google  арт] (https://developers.google.com/maps/documentation/javascript/usage?hl=ru))
+* [ арта OpenStreetMap](http://www.openstreetmap.org/) ([соглашение об использовании](http://www.openstreetmap.org/copyright))
