@@ -49,3 +49,22 @@
 ##Поддерживаемые браузеры 
 
 Поддерживаются ровно те же браузеры, что и [браузеры, поддерживаемые ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/jshelp/supported_browsers.html).
+
+##Лицензия
+Copyright 2013 Esri CIS
+
+Действует лицения [Apache License, версия 2.0] (http://www.apache.org/licenses/LICENSE-2.0). 
+
+Если это не предусмотрено применимыми законами или не согласовано в письменной форме, программное обеспечение распространяется
+«КАК ЕСТЬ», БЕЗ ГАРАНТИЙ И УСЛОВИЙ ЛЮБОГО РОДА, явных или подразумеваемых.
+
+##Использование сторонних библиотек
+Приложение использует дополнительные сторонние библиотеки:
+* [ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/), [лицензионное соглашение]()
+* [gmaps-utility-gis](https://code.google.com/p/gmaps-utility-gis/), [лицензия Apache License, версия 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+##Использование сторонних ресурсовы
+Приложение может использовать сторонние ресурсы:
+* [Базовые карты ArcGIS Online](), [соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf)
+* [Аналитические сервисы ArcGIS Online](http://resources.arcgis.com/en/communities/arcgis-content/029700000044000000.htm#s=0&n=30&d=1&md=acomt-online:00001), [соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf)
+* [Карты Google Maps](), [соглашение об использовании]
