@@ -39,7 +39,7 @@
 
 Приложение может работать как при наличии Интернет-подключения, так и без него. 
 При работе в локальной сети потребуется дополнительно скачивать и установить библиотеку [ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/jshelp/intro_accessapi.html).
-При работе в локальной сети может потребоваться дополнительно скачать и установить библиотеку [agsjs](http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs).
+При работе в локальной сети может потребоваться дополнительно скачать и установить [модуль agsjs](http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs) библиотеки [gmaps-utility-gis](http://gmaps-utility-gis.googlecode.com).
 
 ##Ссылки на веб-сервисы               
       
