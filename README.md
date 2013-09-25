@@ -1,5 +1,4 @@
 # JavaScript Viewer for ArcGIS
-========
 
 Конфигурироемое веб-приложение, предназначенное для работы с ArcGIS for Server через REST-интерфейс. 
 
@@ -38,42 +37,15 @@
 
 ##Работа приложения в сети Интернет и локальной сети 
 
-	Приложение может работать как при наличии Интернет-подключения, так и без него. 
-	При работе в локальной сети потребуется дополнительное скачивание и установка библиотек (см. "Использование библиотеки ArcGIS API for JavaScript" и "Использование сторонних библиотек").
+Приложение может работать как при наличии Интернет-подключения, так и без него. 
+При работе в локальной сети потребуется дополнительно скачивать и установить библиотеку [ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/jshelp/intro_accessapi.html).
+При работе в локальной сети может потребоваться дополнительно скачать и установить библиотеку [agsjs](http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs).
 
-Ссылки на веб-сервисы               
+##Ссылки на веб-сервисы               
       
-	В файле config.xml можно указывать прямые ссылки на веб-сервисы ArcGIS for Server (параметр url). 
-	Для веб-сервисов, зарегистрированных в ArcGIS Online / Portal for ArcGIS можно указывать идентификаторы этих сервисов в ArcGIS Online / Portal for ArcGIS (параметр portalID). При использовании таких сервисов обязательно подключение секции <portal> в config.xml.
+В файле config.xml можно указывать прямые ссылки на веб-сервисы ArcGIS for Server (параметр url). 
+Для веб-сервисов, зарегистрированных в ArcGIS Online / Portal for ArcGIS можно указывать идентификаторы этих сервисов в ArcGIS Online / Portal for ArcGIS (параметр portalID). При использовании таких сервисов обязательно подключение секции <portal> в config.xml.
 
-Использование библиотеки ArcGIS API for JavaScript 
-       
-	Веб-приложение ArcGIS API for JavaScript построено на библиотеке ArcGIS API for JavaScript. 
-	О том, как подключить библиотеку ArcGIS API for JavaScript, можно прочесть здесь: https://developers.arcgis.com/en/javascript/jshelp/intro_accessapi.html.
-	При работе в корпоративной сети без Интернет-подключения необходимо скачать библиотеку ArcGIS API for JavaScript, установить ее и дать соответствующие ссылки из файла index.html.
-	Использование ArcGIS API for JavaSctipt регламентируется лицензионным соглашением: https://developers.arcgis.com/en/javascript/jshelp/terms.html.
+##Поддерживаемые браузеры 
 
-Использование базовых карт и сервисов ArcGIS Online  
-     
-	Использование базовых карт и сервисов ArcGIS Online регламентируется лицензионным соглашением: http://www.esri.com/~/media/Files/Pdfs/legal/pdfs/e204_e300.pdf.
-	Пункты лицензионного соглашения, касающиеся использования базовых карт и серсисов ArcGIS Online, достунпым языком изложены здесь: http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf.
-
-Использование сторонних библиотек  
-                   
-	Веб-приложение JavaScript Viewer for ArcGIS использует стороннюю библиотеку agsjs: http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs.
-
-	Библиотека ajsjs используется для отображение виджета списка слоев и легенды (секция <toc> в config.xml) и для отображения базовой карты Google Maps и выбора базовой карты Google Maps в виджете выбора базовой карты (секция <dijit type = "basemaps">),
-	Непосредственно в приложении используются следующие классы библиотеки: 
-	
-		agsjs.dijit.TOC для отображения виджета списка слоев и легенды;
-		agsjs.layers.GoogleMapsLayer для отображения карты Google Maps и выбора их в виджете выбора базовой карты.
-	
-	Ссылка на библиотеку указывается в файле index.html:
-	При работе в сети Интернет указывается ссылка на библиотеку agsjs  а также ссылка на стилевое описание;
-	При работе в корпоративной сети без доступа к Интернет необходимо скачать библиотеку agsjs и указать соответстувующие локальные ссылки вместо Интернет-ссылок. Карты Google Maps отображаются только при наличии Интернет-подключения.
-
-	При отображении карт Google Maps библиотека agsjs используется JavaScript API Google карт. Существуют ограничения на использование JavaScript API Google карт.
-
-Поддерживаемые браузеры 
-
-	Поддерживаются ровно те же браузеры, что и браузеры, поддерживаемые ArcGIS API for JavaScript.
+Поддерживаются ровно те же браузеры, что и [браузеры, поддерживаемые ArcGIS API for JavaScript](https://developers.arcgis.com/en/javascript/jshelp/supported_browsers.html).
