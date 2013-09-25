@@ -113,7 +113,7 @@
 			wkid               = "102100"
 			slider             = "large"
 			logoVisible        = "false"
-			attributionVisible = "false" 
+			attributionVisible = "true" 
 			basemap            = "osm">
 			
 			<extent
@@ -160,6 +160,7 @@
 				visible  = "true"
 				toc      = "true"
 				tocSlider = "true"
+				opacity  = "0.5"
 				token = "">
 			
 				<sublayers>
@@ -224,7 +225,6 @@
 					<sublayer
 						id = "0"
 						title = "Точки"
-						definitionExpression = "creator = $login"
 						visible = "true">
 						
 						<popup
@@ -262,7 +262,6 @@
 					<sublayer
 						id = "1"
 						title = "Полигоны"
-						definitionExpression = "creator = $login"
 						visible = "true">
 						
 						<popup
@@ -307,7 +306,6 @@
 				toc = "true"
 				token = ""
 				mode = "ONDEMAND"
-				definitionExpression = "creator = $login"
 				outFields = "*"
 				dateFilter = "false"
 				snapping = "true">

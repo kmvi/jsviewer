@@ -702,6 +702,16 @@ function ParseConfig()
 										
 					layer.token   = item1.getAttribute("token");
 					layer.opacity = item1.getAttribute("opacity");
+					
+					try
+					{
+						layer.opacity = parseFloat (layer.opacity);
+					}
+					catch (err)
+					{
+						layer.opacity = 1;
+					};
+					
 					layer.id      = item1.getAttribute("id");
 					basemap.layers.push (layer);
 				});
@@ -766,7 +776,7 @@ function ParseConfig()
 		
 		try
 		{
-			layer.opacity  = parseInt (layer.opacity );
+			layer.opacity  = parseFloat (layer.opacity );
 		}
 		catch (err)
 		{
