@@ -180,10 +180,11 @@ function ParseConfig()
 	
 	heading.type = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('type') == undefined)) ? 'image' : _heading[0].getAttribute('type');
 	heading.image = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('image') == undefined)) ? 'images/header.png' : _heading[0].getAttribute('image');
-	heading.fillimage = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('bcakground') == undefined)) ? 'images/background.png' : _heading[0].getAttribute('background');
+	heading.fillimage = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('background') == undefined)) ? 'images/background.png' : _heading[0].getAttribute('background');
 	heading.height = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('height') == undefined)) ? '63px' : _heading[0].getAttribute('height');
 	heading.caption = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('caption') == undefined)) ? 'JavaScript Viewer for ArcGIS' : _heading[0].getAttribute('caption');
 	heading.fontsize = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-size') == undefined)) ? '35pt' : _heading[0].getAttribute('font-size');
+	heading.fontname = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-name') == undefined)) ? 'Arial' : _heading[0].getAttribute('font-name');
 	heading.fontcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('font-color') == undefined)) ? '#FFFFFF' : _heading[0].getAttribute('font-color');
 	heading.bgcolor = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('background-color') == undefined)) ? '#0000FF' : _heading[0].getAttribute('background-color');
 	heading.textalign = ((_heading == undefined) || (_heading[0] == undefined) || (_heading[0].getAttribute('text-align') == undefined)) ? 'left' : _heading[0].getAttribute('text-align');	
@@ -1305,6 +1306,7 @@ function Design()
 	{
 		dojo.byId("heading").innerHTML = config.design.heading.caption;
 		dojo.style(dojo.byId("heading"), "font-size", config.design.heading.fontsize);
+		dojo.style(dojo.byId("heading"), "font-family", config.design.heading.fontname);
 		dojo.style(dojo.byId("heading"), "color", config.design.heading.fontcolor);
 		dojo.style(dojo.byId("heading"), "background-color", config.design.heading.bgcolor);
 		dojo.style(dojo.byId("heading"), "text-align", config.design.heading.textalign);
@@ -1686,6 +1688,12 @@ function OnMapLoad (evt)
 
 function OnMapClick(evt) 
 {	
+	// prevent twice firing event on mobile devices
+	if (evt.constructor.name == undefined)
+	{
+		return;
+	};
+	
 	if (activeTool == 'edit')
 	{		
 		if ((map.selectedLayers.length > 0) || (editorWidget._layer != null) && (editorWidget._activeTemplate == null))
@@ -1719,6 +1727,7 @@ function OnMapClick(evt)
 	if (activeTool == 'identify')
 	{
 		map.infoWindow.clearFeatures();			
+		alert ('show');
 		identifyDialog.show();
 		
 		var tasks = dojo.map(config.map.identifyLayers, function(layer) 
@@ -1804,6 +1813,7 @@ function OnMapClick(evt)
 				};
 				
 				identifyDialog.hide();
+				dijit.byId('outerContainer').resize();
 				return results;
 			},
 			function(err)
