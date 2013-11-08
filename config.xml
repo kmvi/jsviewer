@@ -114,7 +114,7 @@
 			slider             = "large"
 			logoVisible        = "false"
 			attributionVisible = "true" 
-			basemap            = "osm">
+			basemap            = "rosreestr">
 			
 			<extent
 				xmin = "3494598"
@@ -148,6 +148,24 @@
 						token     = ""
 					/>
 				</layers>
+			</basemap>
+			
+			<basemap
+				title = "Россия"
+				image = "images/basemaps/basemap_russia_topo.jpg"
+				id    = "russia_topo">
+				
+				<layers>
+					<layer
+						type      = "tiled"
+						url       = "http://46.137.184.237/arcgis/rest/services/russia_topo/MapServer"		
+						id        = "russia_topo"
+						title     = "Россия"
+						opacity   = "1" 
+						token     = ""
+					/>
+				</layers>
+				
 			</basemap>
 		</basemaps>	
 				

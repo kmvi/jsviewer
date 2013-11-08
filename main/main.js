@@ -127,7 +127,7 @@ function startApp()
 
 	if ( ! ParseConfig() )
 	{
-		exit;
+		return;
 	}
 	
 	Design();
@@ -158,7 +158,7 @@ function ParseConfig()
 	if (xmlDoc == null)
 	{
 		ShowError(0,'Файл config.xml не найден, пуст или содержит синтаксические ошибки. Приложение не будет запущено.');
-		exit;
+		return;
 	}	
 	
 	var _design = xmlDoc.getElementsByTagName("design");
@@ -215,7 +215,7 @@ function ParseConfig()
 		if (portal.appID == undefined)
 		{
 			ShowError(0,'[portal]:не задан обязательный параметр appID.');
-			exit;
+			return;
 		}
 		
 		config.portal = portal;
@@ -352,7 +352,7 @@ function ParseConfig()
 							if (bookmark.title == undefined)
 							{
 								ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]: Отсутствует обязательный параметр title.');
-								exit;
+								return;
 							}
 							
 							var _extent = item.getElementsByTagName("extent");
@@ -370,7 +370,7 @@ function ParseConfig()
 								if (bookmark.extent.xmin == undefined)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр xmin.');
-									exit;
+									return;
 								}
 								
 								try
@@ -380,13 +380,13 @@ function ParseConfig()
 								catch (err)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра xmin задано неправильно.');
-									exit;
+									return;
 								}
 										
 								if (bookmark.extent.xmax == undefined)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр xmax.');
-									exit;
+									return;
 								}
 								
 								try
@@ -396,13 +396,13 @@ function ParseConfig()
 								catch (err)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра xmax задано неправильно.');	
-									exit;
+									return;
 								}
 										
 								if (bookmark.extent.ymin == undefined)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр ymin.');
-									exit;
+									return;
 								}
 								
 								try
@@ -412,13 +412,13 @@ function ParseConfig()
 								catch (err)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра ymin задано неправильно.');	
-									exit;
+									return;
 								}
 										
 								if (bookmark.extent.ymax == undefined)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]: Отсутствует обязательный параметр ymax.');
-									exit;
+									return;
 								}		
 
 								try
@@ -428,7 +428,7 @@ function ParseConfig()
 								catch (err)
 								{
 									ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]:[extent]:Значение параметра ymax задано неправильно.');
-									exit;
+									return;
 								}		
 
 								try
@@ -445,7 +445,7 @@ function ParseConfig()
 							else
 							{
 								ShowError (0,'[dijits]:[dijit type = "bookmarks"]:[bookmark]: Отсутствует обязательная секция [extent].');
-								exit;
+								return;
 							}
 
 						});
@@ -495,7 +495,7 @@ function ParseConfig()
 				if (dijits.dateFilter.field == undefined)
 				{
 					ShowError (0,'[dijits]:[dijit type = "dateFilter"]: Отсутствует обязательный параметр field.');
-					exit;
+					return;
 				}
 			}
 
@@ -514,7 +514,7 @@ function ParseConfig()
 	if (_map[0] == undefined) 
 	{
 		ShowError (0,'Отсутствует обязательная секция [map].');
-		exit;
+		return;
 	}
 	
 	_options = _map[0].getElementsByTagName ("options");
@@ -532,7 +532,8 @@ function ParseConfig()
 	}
 	
 	options.slider = ((_options[0] == undefined) || (_options[0].getAttribute('slider') == undefined)) ? 'small' : _options[0].getAttribute("slider");
-	options.basemap = (_options[0] == undefined) ? undefined : _options[0].getAttribute('basemap');
+	options.basemap = ((_options[0].getAttribute('basemap') == undefined) || (_options[0].getAttribute('basemap') == '')) ? undefined : _options[0].getAttribute('basemap');
+
 	options.logoVisible = ((_options[0] == undefined) || (_options[0].getAttribute("logoVisible") == "undefined")) ? true : (_options[0].getAttribute("logoVisible") == 'true');
 	options.attributionVisible = ((_options[0] == undefined) || (_options[0].getAttribute("attributionVisible") == "undefined")) ? true : (_options[0].getAttribute("attributionVisible") == 'true');
 			
@@ -548,7 +549,7 @@ function ParseConfig()
 			if (extent.xmin == undefined)
 			{
 				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр xmin.');
-				exit;
+				return;
 			}
 				
 			try
@@ -558,7 +559,7 @@ function ParseConfig()
 			catch (err)
 			{
 				ShowError (0,'[map]:[options]:[extent]:Значение параметра xmin задано неправильно.');	
-				exit;
+				return;
 			}
 						
 			extent.xmax = _extent[0].getAttribute("xmax");
@@ -566,7 +567,7 @@ function ParseConfig()
 			if (extent.xmax == undefined)
 			{
 				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр xmax.');
-				exit;
+				return;
 			}		
 
 			try
@@ -576,7 +577,7 @@ function ParseConfig()
 			catch (err)
 			{
 				ShowError (0,'[map]:[options]:[extent]:Значение параметра xmax задано неправильно.');
-				exit;
+				return;
 			}
 						
 			extent.ymin = _extent[0].getAttribute("ymin");
@@ -584,7 +585,7 @@ function ParseConfig()
 			if (extent.ymin == undefined)
 			{
 				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр ymin.');
-				exit;
+				return;
 			}
 			
 			try
@@ -594,7 +595,7 @@ function ParseConfig()
 			catch (err)
 			{
 				ShowError (0,'[map]:[options]:[extent]:Значение параметра уmin задано неправильно.');		
-				exit;
+				return;
 			}
 					
 			extent.ymax = _extent[0].getAttribute("ymax");
@@ -602,7 +603,7 @@ function ParseConfig()
 			if (extent.ymax == undefined)
 			{
 				ShowError (0,'[map]:[options]:[extent]: Отсутствует обязательный параметр ymax.');
-				exit;
+				return;
 			}			
 
 			try
@@ -613,7 +614,7 @@ function ParseConfig()
 			catch (err)
 			{
 				ShowError (0,'[map]:[options]:[extent]:Значение параметра ymax задано неправильно.');	
-				exit;
+				return;
 			}
 						
 			options.extent = extent;	
@@ -636,13 +637,13 @@ function ParseConfig()
 			dojo.forEach(_basemap, function (item) 
 			{
 				var basemap = new Object;
-							
+
 				basemap.id   		= item.getAttribute("id");
 	
 				if (basemap.id == undefined)
 				{
 					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр id.');
-					exit;
+					return;
 				}
 							
 				basemap.title		= item.getAttribute("title");
@@ -650,7 +651,7 @@ function ParseConfig()
 				if (basemap.title == undefined)
 				{
 					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр title.');
-					exit;
+					return;
 				}						
 							
 				basemap.image       = item.getAttribute("image");
@@ -658,7 +659,7 @@ function ParseConfig()
 				if (basemap.image == undefined)
 				{
 					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательный параметр image.');
-					exit;
+					return;
 				}						
 							
 				basemap.layers     = [];
@@ -668,7 +669,7 @@ function ParseConfig()
 				if (_layers[0] == undefined)
 				{
 					ShowError (0,'[map]:[basemaps]:[basemap]: Отсутствует обязательная секция [layers].');
-					exit;
+					return;
 				}
 							
 				_layer  = _layers[0].getElementsByTagName("layer");
@@ -676,7 +677,7 @@ function ParseConfig()
 				if (_layer[0] == undefined)
 				{
 					ShowError (0,'[map]:[basemaps]:[basemap]:[layers]: Отсутствует обязательная секция [layer].');
-					exit;
+					return;
 				}
 				
 				var item1;
@@ -689,7 +690,7 @@ function ParseConfig()
 					if (layer.type == undefined)
 					{
 						ShowError (0,'[map]:[basemaps]:[basemap]:[layers]:[layer]: Отсутствует обязательный параметр type.');
-						exit;
+						return;
 					}
 										
 					layer.url     = item1.getAttribute("url");
@@ -698,7 +699,7 @@ function ParseConfig()
 					if ((layer.url == undefined) && (layer.portalID == undefined))
 					{
 						ShowError (0,'[map]:[basemaps]:[basemap]:[layers]:[layer]: Одновременно отсутствуют параметры url и portalID.');
-						exit;
+						return;
 					}							
 										
 					layer.token   = item1.getAttribute("token");
@@ -727,7 +728,7 @@ function ParseConfig()
 	if (_opLayers[0] == undefined)
 	{
 		ShowError (0,'[map]: Отсутствует обязательная секция [mapLayers].');
-		exit;
+		return;
 	}
 	
 	var _layer    = _opLayers[0].getElementsByTagName("layer");
@@ -735,7 +736,7 @@ function ParseConfig()
 	if (_layer[0] == undefined)
 	{
 		ShowError (0,'[map]:[mapLayers]: Отсутствует обязательная секция [layer].');
-		exit;
+		return;
 	}
 	
 	var edit  = new Object;
@@ -753,7 +754,7 @@ function ParseConfig()
 		if (layer.type == undefined)
 		{
 			ShowError (0,'[map]:[mapLayers]:[layer]: Отсутствует обязательный параметр type.');
-			exit;
+			return;
 		}
 		
 		layer.id       = item.getAttribute("id");
@@ -764,7 +765,7 @@ function ParseConfig()
 		if ((layer.url == undefined) && (layer.portalID == undefined))
 		{
 			ShowError (0,'[map]:[mapLayers]:[layer]: Одновременно отсутствуют параметры url и portalID.');
-			exit;
+			return;
 		}
 
 		layer.toc      = item.getAttribute("toc") == undefined ? true : item.getAttribute("toc") == "true";		
@@ -809,7 +810,7 @@ function ParseConfig()
 					catch (err)
 					{
 						ShowError (0,'[map]:[mapLayers]:[layer]:[sublayers]:[sublayer]:Параметр id задан неправильно (значение должно быть целым числом).');
-						exit;
+						return;
 					}
 					
 					sublayer.definitionExpression = item1.getAttribute("definitionExpression");
@@ -844,7 +845,7 @@ function ParseConfig()
 								if (field.fieldName == undefined)
 								{
 									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[fields]:[field]: Отсутствует обязательный параметр name.');
-									exit;
+									return;
 								}
 								
 								field.label = item2.getAttribute("label");
@@ -899,7 +900,7 @@ function ParseConfig()
 								if (chart.fields == undefined)
 								{
 									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[charts]:[chart]: Отсутствует обязательный параметр fields.');
-									exit;
+									return;
 								}
 								else
 								{
@@ -933,7 +934,7 @@ function ParseConfig()
 								if ((image.url == undefined) && (image.field == undefined))
 								{
 									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[popup]:[images]:[image]: Одновременно отсутствуют параметры url и field.');
-									exit;
+									return;
 								}
 								
 								popup.images.push (image);
@@ -955,7 +956,7 @@ function ParseConfig()
 						if (edit.featureServiceUrl == undefined)
 						{
 							ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[edit]: Отсутствуют обязательный параметр featureServiceUrl.');
-							exit;
+							return;
 						}
 						
 						var _fields = _edit[0].getElementsByTagName ("fields");
@@ -974,7 +975,7 @@ function ParseConfig()
 								if (field.fieldName == undefined)
 								{
 									ShowError (0,'[map]:[mapLayers]:[layer] (type = "dynamic"):[sublayers]:[sublayer]:[edit]:[field]: Отсутствуют обязательный параметр name.');
-									exit;
+									return;
 								}
 								
 								field.label = item2.getAttribute("label");
@@ -1017,7 +1018,7 @@ function ParseConfig()
 				if (tooltip.content == undefined)
 				{
 					ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[tooltip]: Отсутствуют обязательный параметр content.');
-					exit;
+					return;
 				}
 			
 				tooltip.opacity = _tooltip[0].getAttribute("opacity");
@@ -1058,7 +1059,7 @@ function ParseConfig()
 						if (field.fieldName == undefined)
 						{
 							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature") :[popup]:[fields]:[field]: Отсутствует обязательный параметр name.');
-							exit;
+							return;
 						}
 								
 						field.label = item1.getAttribute("label");
@@ -1112,7 +1113,7 @@ function ParseConfig()
 						if (chart.fields == undefined)
 						{
 							ShowError (0,'[map]:[mapLayers]:[layer]:[popup]:[charts]:[chart]: Отсутствует обязательный параметр fields.');
-							exit;
+							return;
 						}
 						else
 						{
@@ -1146,7 +1147,7 @@ function ParseConfig()
 						if ((image.url == undefined) && (image.field == undefined))
 						{
 							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[popup]:[images]:[image]: Одновременно отсутствуют параметры url и field.');
-							exit;
+							return;
 						}
 				
 						popup.images.push (image);
@@ -1178,7 +1179,7 @@ function ParseConfig()
 						if (field.fieldName == undefined)
 						{
 							ShowError (0,'[map]:[mapLayers]:[layer] (type = "feature"):[edit]:[fields]:[field]: Отсутствуют обязательный параметр name.');
-							exit;
+							return;
 						}
 							
 						field.label = item1.getAttribute("label");
@@ -1348,22 +1349,60 @@ function LoadMap()
 		fillSymbol: new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255,0,0]), 2), new dojo.Color([255,255,0,0.25]))
 	}, dojo.create("div"));
 	
-	var arcgisBaseMaps = ["streets" , "satellite" , "hybrid", "topo", "gray", "oceans", "national-geographic", "osm"];
+	arcgisBaseMaps = ["satellite", "hybrid", "streets" , "topo", "gray", "national-geographic", "oceans", "osm"];
 	
-	if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
+	if (config.map.options.basemap != undefined) 
 	{
-		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, basemap : config.map.options.basemap, infoWindow: popup, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, wrapAround180 : config.map.options.wrapAround180, fadeOnZoom: true, showInfoWindowOnClick : false})
-		map['noBasemap'] = false;
+		if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
+		{
+			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, basemap : config.map.options.basemap, infoWindow: popup, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, wrapAround180 : config.map.options.wrapAround180, fadeOnZoom: true, showInfoWindowOnClick : false});
+		}
+		else
+		{
+			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, basemap : 'osm', infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
+		}
 	}
 	else
 	{
-		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false})
-		map['noBasemap'] = true;
+		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
 	}
 		
 	map.on ('layers-add-result', LayersAddedToMap);
 	map.on ('click', OnMapClick);
 	map.on ('load', OnMapLoad);
+	
+	var basemaps = [];
+
+	for (var i = 0, counti = config.map.basemaps.length; i < counti; i++)
+	{
+		var layers = [];
+			
+		for (var j = config.map.basemaps[i].layers.length - 1; j >= 0; j--)
+		{
+			if ((config.map.basemaps[i].layers[j].token != "") && (config.map.basemaps[i].layers[j].token != undefined))
+			{
+				url = config.map.basemaps[i].layers[j].url + "?token=" + config.map.basemaps[i].layers[j].token
+			}
+			else
+			{
+				url = config.map.basemaps[i].layers[j].url
+			}
+					
+			var layer = new esri.dijit.BasemapLayer ({url: url});
+			layers.push (layer);
+		}
+				
+		var basemap = new esri.dijit.Basemap ({
+			id     : config.map.basemaps[i].id,
+			layers : layers,
+			title  : config.map.basemaps[i].title,
+			thumbnailUrl : config.map.basemaps[i].image
+		});
+					
+		basemaps.push (basemap);
+	}		
+		
+	map['userBasemaps'] = basemaps;
 		
 	var url, layer, mode;
 	var layers = [];
@@ -1435,8 +1474,6 @@ function LoadMap()
 						dojo.connect (featureSubLayer, "onSelectionComplete", function (features,selectionMethod)
 						{
 							var subLayerID = parseInt (featureSubLayer.subLayerID);
-							console.log (subLayerID);
-							console.log (featureSubLayer.parentLayer.visibleLayers);
 							
 							if (featureSubLayer.parentLayer.visibleLayers.indexOf (subLayerID) >= 0)
 							{
@@ -1689,7 +1726,7 @@ function OnMapLoad (evt)
 function OnMapClick(evt) 
 {	
 	// prevent twice firing event on mobile devices
-	if (evt.constructor.name == undefined)
+	if (evt.constructor.name != "Object")
 	{
 		return;
 	};
@@ -1727,7 +1764,6 @@ function OnMapClick(evt)
 	if (activeTool == 'identify')
 	{
 		map.infoWindow.clearFeatures();			
-		alert ('show');
 		identifyDialog.show();
 		
 		var tasks = dojo.map(config.map.identifyLayers, function(layer) 
@@ -1862,10 +1898,9 @@ function LayersAddedToMap (results)
 	ApplyLoginFilter();
 	LoadWidgets();
 	dijit.byId('outerContainer').resize();
-	loadAppDialog.hide();
+	
+	SetBasemap();
 };
-
-
 
 function ApplyLoginFilter()
 {
@@ -2287,76 +2322,125 @@ function resizeMap()
 	}
 }
 
-
 function AddBasemapGalleryWidget() 
 {   
-	var basemaps= [];
-	
-	for (var i = 0, counti = config.map.basemaps.length; i < counti; i++)
-	{
-		if (config.map.basemaps[i].gallery)
-		{
-			layers = [];
-			
-			for (var j = config.map.basemaps[i].layers.length - 1; j >= 0; j--)
-			{
-				if ((config.map.basemaps[i].layers[j].token != "") && (config.map.basemaps[i].layers[j].token != undefined))
-				{
-					url = config.map.basemaps[i].layers[j].url + "?token=" + config.map.basemaps[i].layers[j].token
-				}
-				else
-				{
-					url = config.map.basemaps[i].layers[j].url
-				}
-
-				layer = new esri.dijit.BasemapLayer ({url: url});		
-				layers.push (layer);					
-			}
-			
-			var basemap = new esri.dijit.Basemap ({
-				id     : config.map.basemaps[i].id,
-				layers : layers,
-				title  : config.map.basemaps[i].title,
-				thumbnailUrl : config.map.basemaps[i].image
-			});
-			
-			basemaps.push (basemap);
-		}		
-	}	
-	
 	if (config.widgets.gallery.googlemaps)
 	{
-		var basemapGallery = new esri.dijit.BasemapGallery({
+		basemapGallery = new esri.dijit.BasemapGallery({
 			showArcGISBasemaps: config.widgets.gallery.arcgismaps,
 			google: {
-                apiOptions: {
-                    v: '3.6' // use a specific version is recommended for production system.
-                },
+				apiOptions: {
+					v: '3.6' // use a specific version is recommended for production system.
+				},
 				mapOptions: {
 					streetViewControl: false
 				}
-            },
-			basemaps:basemaps,
+			},
+			basemaps: map.userBasemaps,
 			map:map
 		}, dojo.create ('div'));
 	}
 	else
 	{
-		var basemapGallery = new esri.dijit.BasemapGallery({
+		basemapGallery = new esri.dijit.BasemapGallery({
 			showArcGISBasemaps: config.widgets.gallery.arcgismaps,
-			basemaps:basemaps,
+			basemaps: map.userBasemaps,
 			map:map
 		}, 'basemapPanel');
 	}
 	
 	dijit.byId ('basemapPanel').set('content', basemapGallery.domNode);
-
-	dojo.connect(basemapGallery, "onSelectionChange", function () {
+		dojo.connect(basemapGallery, "onSelectionChange", function () {
 		destroyOverview();
 	});
-
+		
 	basemapGallery.startup();
 }
+
+function SetBasemap()
+{	
+	
+	if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
+	{
+		loadAppDialog.hide();
+		return;
+	}
+	
+
+	for (var j = 0; j < map.userBasemaps.length; j ++)
+	{
+		if (map.userBasemaps[j].id == config.map.options.basemap)
+		{
+			break;
+		}
+	}
+	
+	if (j == map.userBasemaps.length)
+	{
+		ShowError (1, "Базовая карта с идентификатором '" + config.map.options.basemap[0] + "' не была найдена в списке базовых карт.");
+		loadAppDialog.hide();
+		return;
+	}
+	
+	var basemap = map.userBasemaps[j];
+	
+	require(["esri/request"], function(esriRequest) {		
+		var requests = [];
+		
+		for (var k = 0; k < basemap.layers.length; k ++)	
+		{
+			var request = esriRequest({
+				url: basemap.layers[k].url,
+				content: { f: "json" },
+				handleAs: "json",
+				callbackParamName: "callback"
+			});			
+
+			requests.push (request.then());
+		}
+		
+		if (requests.length > 0)
+		{
+			var dlRequests = new dojo.DeferredList(requests); 
+		
+			dlRequests.then(
+				function(res)
+				{
+					var failed = false;
+					
+					for (var j = 0; j < res.length; j ++)
+					{
+						if (! res[j][0])
+						{
+							failed = true;
+							break;
+						}
+					}
+					
+					if (failed)
+					{
+						ShowError (1, "Не удалось отобразить базовую карту с идентификатором '" + basemap.id + "'.");
+					}
+					else
+					{
+						basemapGallery.select (basemap.id);
+					}
+					
+					loadAppDialog.hide();
+				},
+				function (err)
+				{
+				}
+			);
+		}
+		else
+		{
+			loadAppDialog.hide();
+		}
+	});
+
+}
+
 
 function AddPrintWidget() 
 {
@@ -2506,7 +2590,7 @@ function destroyOverview() {
   if (ov) {
     var vis = ov.visible;
     ov.destroy();
-    addOverview(vis);
+    AddOverviewWidget(vis);
   }
 }
 
