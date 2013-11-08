@@ -72,7 +72,7 @@
 		</dijit>
 		
 		<dijit type="info"
-         	    html = "Разработка компании &lt;a href = &quot;http://www.esri-cis.ru&quot; target = &quot;_blank&quot; &gt;Esri CIS&lt;/a&gt;.&lt;/br&gt;&lt;/br&gt; Версия 1.0 (сборка 05.07.2013).&lt;/br&gt;&lt;/br&gt;&lt;a href = &quot;help.docx&quot; target = &quot;_blank&quot; &gt;&lt;B&gt;Загрузить справку.&lt;/&gt;&lt;/a&gt;"/>
+         	    html = "Разработка компании &lt;a href = &quot;http://www.esri-cis.ru&quot; target = &quot;_blank&quot; &gt;Esri CIS&lt;/a&gt;.&lt;/br&gt;&lt;/br&gt; Версия 1.1 (сборка 08.11.2013).&lt;/br&gt;&lt;/br&gt;&lt;a href = &quot;config_help.txt&quot; target = &quot;_blank&quot; &gt;&lt;B&gt;Загрузить справку.&lt;/&gt;&lt;/a&gt;"/>
 		
 		<dijit type="geocoder" />
 			   
@@ -114,7 +114,7 @@
 			slider             = "large"
 			logoVisible        = "false"
 			attributionVisible = "true" 
-			basemap            = "rosreestr">
+			basemap            = "russia_topo">
 			
 			<extent
 				xmin = "3494598"
