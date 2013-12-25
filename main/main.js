@@ -770,6 +770,7 @@ function ParseConfig()
 
 		layer.toc      = item.getAttribute("toc") == undefined ? true : item.getAttribute("toc") == "true";		
 		layer.tocSlider  = item.getAttribute("tocSlider") == undefined ? false : item.getAttribute("tocSlider") == "true";
+		layer.tocSublayers  = item.getAttribute("tocSublayers") == undefined ? true : item.getAttribute("tocSublayers") == "true";
 		layer.dateFilter = item.getAttribute("dateFilter") == undefined ? false : item.getAttribute("dateFilter") == "true"
 		layer.visible  = item.getAttribute("visible") == undefined ? true : item.getAttribute("visible") == "true";
 		layer.title    = item.getAttribute("title");
@@ -1615,6 +1616,7 @@ function LoadMap()
 		layer ['title']      = config.map.layers[i].title;
 		layer ['toc']        = config.map.layers[i].toc;
 		layer ['tocSlider']  = config.map.layers[i].tocSlider;
+		layer ['tocSublayers']  = config.map.layers[i].tocSublayers;		
 		layer ['dateFilter'] = config.map.layers[i].dateFilter;	
 
 		layers.push (layer);		
@@ -1712,7 +1714,7 @@ function ShowFeatureLayerInfoWindow (evt)
 			BuildFeaturePopup (feature, popup);			
 			var features = [feature];
 			lostFeature = feature;
-			map.infoWindow.setFeatures (features);
+			//map.infoWindow.setFeatures (features);
 			break;
 		}		
 	}
@@ -1840,8 +1842,10 @@ function OnMapClick(evt)
 				if ((lastClickedMapPoint != null) && (lastClickedMapPoint.x == evt.mapPoint.x) && (lastClickedMapPoint.y == evt.mapPoint.y) && (lastClickedMapPoint.spatialReference.wkid == evt.mapPoint.spatialReference.wkid) && (lostFeature != null))
 				{
 					results.push (lostFeature);
-					lostFeature = null;
 				}
+				
+				lostFeature = null;
+				lastClickedMapPoint = null;
 								
 				if (results.length > 0)
 				{					
@@ -2285,7 +2289,8 @@ function AddTocWidget()
 				{
 					layer    : map.layers[i],
 					title    : map.layers[i].title,
-					slider   : map.layers[i].tocSlider
+					slider   : map.layers[i].tocSlider,
+					noLegend : (map.layers[i].tocSublayers == false)
 				}
 			);
 		}
