@@ -69,3 +69,14 @@ Copyright 2013 Esri CIS
 * [Аналитические сервисы ArcGIS Online](http://resources.arcgis.com/en/communities/arcgis-content/029700000044000000.htm#s=0&n=30&d=1&md=acomt-online:00001) ([соглашение об использовании](http://downloads2.esri.com/ArcGISOnline/docs/tou_summary.pdf))
 * [Карты Google Maps] (https://maps.google.com/) ([соглашение об использовании JavaScript API Google Карт] (https://developers.google.com/maps/documentation/javascript/usage?hl=ru))
 * [Карта OpenStreetMap](http://www.openstreetmap.org/) ([соглашение об использовании](http://www.openstreetmap.org/copyright))
+
+##Обновления
+v.1.1 (08/11/2013)
+* [Исправлена ошибка идентификации объектов при запуске приложения на мобильных устройствах iOS и Android]
+* [Исправлены несоответствия между кодом приложения и справкой по работе с приложением]
+* [Базовую карту из секции <basemaps> в файле config.xml теперь можно использовать по умолчанию при загрузке приложения]
+
+v.1.2 (25/12/2013)
+* [Исправлена ошибка двойной идентификации объектов векторного слоя]
+* [Добавлена возможность не включать подслои слоя в виджет таблицы содержания (toc). Опция настраивается в конфигурационном файле с помощью параметра tocSublayers в секции <layer>]
+* [Файлы readme.txt и config_help.txt сохранены в кодировке UTF-8]
