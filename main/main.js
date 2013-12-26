@@ -56,6 +56,8 @@ dojo.require("esri.dijit.Bookmarks");
 dojo.require("esri.dijit.Directions");
 dojo.require("esri.arcgis.Portal")
 dojo.require("dojo.fx");
+dojo.require("esri.dijit.HomeButton");
+dojo.require("esri.dijit.LocateButton");
 
 //other
 dojo.require("app.OAuthHelper");
@@ -267,6 +269,15 @@ function ParseConfig()
 			{
 				dijits.scalebar = new Object;
 			}
+			
+			if (widget.getAttribute("type") == "navigation")
+			{
+				dijits.navigation = new Object;
+				dijits.navigation.slider =  (widget.getAttribute("slider") == undefined) ? true : (widget.getAttribute("slider") == "true");
+				dijits.navigation.sliderStyle =  (widget.getAttribute("sliderStyle") == undefined) ? 'small' : widget.getAttribute("sliderStyle");
+				dijits.navigation.homeButton =  (widget.getAttribute("homeButton") == undefined) ? true : (widget.getAttribute("homeButton") == "true");
+				dijits.navigation.locateButton = (widget.getAttribute("locateButton") == undefined) ? false : (widget.getAttribute("locateButton") == "true");			
+			}			
 		
 			if (widget.getAttribute("type") == "print")
 			{
@@ -530,8 +541,7 @@ function ParseConfig()
 	{
 		options.wkid = undefined;
 	}
-	
-	options.slider = ((_options[0] == undefined) || (_options[0].getAttribute('slider') == undefined)) ? 'small' : _options[0].getAttribute("slider");
+
 	options.basemap = ((_options[0].getAttribute('basemap') == undefined) || (_options[0].getAttribute('basemap') == '')) ? undefined : _options[0].getAttribute('basemap');
 
 	options.logoVisible = ((_options[0] == undefined) || (_options[0].getAttribute("logoVisible") == "undefined")) ? true : (_options[0].getAttribute("logoVisible") == 'true');
@@ -1343,9 +1353,15 @@ function LoadMap()
 	{
 		var extent = null;
 	};
-		
-	var slider = config.map.options.slider != "none";
-
+	
+	
+	var slider = (config.widgets != undefined) && (config.widgets.navigation != undefined) && config.widgets.navigation.slider;
+	
+	if (slider)
+	{
+		var sliderStyle = config.widgets.navigation.sliderStyle;
+	}
+	
 	var popup = new esri.dijit.Popup({
 		fillSymbol: new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([255,0,0]), 2), new dojo.Color([255,255,0,0.25]))
 	}, dojo.create("div"));
@@ -1356,18 +1372,18 @@ function LoadMap()
 	{
 		if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
 		{
-			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, basemap : config.map.options.basemap, infoWindow: popup, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, wrapAround180 : config.map.options.wrapAround180, fadeOnZoom: true, showInfoWindowOnClick : false});
+			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle: sliderStyle, basemap : config.map.options.basemap, infoWindow: popup, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, wrapAround180 : config.map.options.wrapAround180, fadeOnZoom: true, showInfoWindowOnClick : false});
 		}
 		else
 		{
-			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, basemap : 'osm', infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
+			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  sliderStyle, basemap : 'osm', infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
 		}
 	}
 	else
 	{
 		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
 	}
-		
+	
 	map.on ('layers-add-result', LayersAddedToMap);
 	map.on ('click', OnMapClick);
 	map.on ('load', OnMapLoad);
@@ -2176,7 +2192,7 @@ function LoadWidgets()
 		dijit.byId ('outerContainer').removeChild (dijit.byId ('props'));
 	};
 	
-	// Scalebar & Overview
+	// Scalebar, Overview, Navigation
 	
 	if (config.widgets.scalebar != undefined)
 	{
@@ -2201,6 +2217,18 @@ function LoadWidgets()
 			ShowError (1, "Ошибка создания виджета обзорного окна карты.");
 		}
 	}	
+	
+	if (config.widgets.navigation != undefined) 
+	{
+		try
+		{
+			AddNavigationWidgets();
+		}
+		catch (err)
+		{
+			ShowError (1, "Ошибка создания виджетов навигации.");
+		}
+	}
 
 	dojo.connect (dijit.byId ('toolsContainer'), 'selectChild', ToolsTabSelected);
 	
@@ -2572,6 +2600,98 @@ function AddIdentifyWidget()
     map.identifyParams.tolerance = config.widgets.identify.tolerance;
 	map.identifyParams.returnGeometry = true;
     map.identifyParams.layerOption = esri.tasks.IdentifyParameters.LAYER_OPTION_VISIBLE;	
+}
+
+function AddNavigationWidgets()
+{
+	if (config.widgets.navigation.homeButton)
+	{
+		var home = new esri.dijit.HomeButton({
+			map: map
+		}, "HomeButton");
+		
+		home.domNode.childNodes[1].childNodes[1].title = "Начальный экстент";
+		home.startup();		
+		
+		console.log (config.widgets.navigation.sliderStyle);
+		
+		if (config.widgets.navigation.slider)
+		{
+			if (config.widgets.navigation.sliderStyle == 'small')
+			{
+				dojo.style(home.domNode, "top", "120px");
+			}
+			else
+			{
+				dojo.style(home.domNode, "top", "240px");
+			}
+		}
+		else
+		{
+			dojo.style(home.domNode, "top", "20px");
+		}
+	}
+	
+	if (config.widgets.navigation.locateButton)
+	{
+		locate = new esri.dijit.LocateButton({
+			map: map
+		}, "LocateButton");
+				
+		locate.startup();
+		locate.domNode.childNodes[1].childNodes[1].title = "Мое местоположение";
+		
+		locate.on ('locate', OnGeoLocate);
+		
+		if (config.widgets.navigation.slider)
+		{
+			if (config.widgets.navigation.sliderStyle == 'small')
+			{
+				if (config.widgets.navigation.homeButton)
+				{
+					dojo.style(locate.domNode, "top", "160px");
+				}
+				else
+				{
+					dojo.style(locate.domNode, "top", "120px");
+				}
+			}
+			else
+			{
+				if (config.widgets.navigation.homeButton)
+				{
+					dojo.style(locate.domNode, "top", "280px");
+				}
+				else
+				{
+					dojo.style(locate.domNode, "top", "240px");
+				}
+			}
+		}
+		else
+		{
+			if (config.widgets.navigation.homeButton)
+			{
+				dojo.style(locate.domNode, "top", "60px");
+			}
+			else
+			{
+				dojo.style(locate.domNode, "top", "20px");
+			}
+		}
+	}	
+		
+}
+
+function OnGeoLocate (res)
+{
+	timer = setInterval(ClearLocateLayer, 5000);
+}
+
+function ClearLocateLayer()
+{
+	locate.clear();
+	clearInterval (timer);
 }
 
 function AddOverviewWidget(isVisible) 

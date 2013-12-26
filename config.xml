@@ -2,7 +2,7 @@
 <configuration>	
 	<design
 		title = "JavaScript Viewer for ArcGIS"
-		theme = "orange">
+		theme = "gray">
 		
 		<heading
 			type = "image"
@@ -103,6 +103,13 @@
 		<dijit type        = "dateFilter"	
 			   limits      = "double"
 			   field       = "create_date"/>
+		
+		
+		<dijit  type = "navigation"
+			    slider = "false"
+				sliderStyle = "large"
+				homeButton = "true"
+				locateButton = "true" />			  	
 			   		
     </dijits>
    
@@ -111,7 +118,8 @@
 		
 		<options
 			wkid               = "102100"
-			slider             = "large"
+			slider             = "small"
+			homeButton         = "true"
 			logoVisible        = "false"
 			attributionVisible = "true" 
 			basemap            = "osm">
@@ -153,7 +161,7 @@
 			<basemap
 				title = "Россия"
 				image = "images/basemaps/basemap_russia_topo.jpg"
-				id    = "russia_topo">
+				id    = "osm">
 				
 				<layers>
 					<layer
