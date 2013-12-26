@@ -19,7 +19,7 @@
 	
 	<tasks>
 		<geometry 
-			url = "http://tasks.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServerr"
+			url = "http://tasks.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer"
 		/> 
 		
 		<geocoder
