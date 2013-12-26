@@ -106,8 +106,8 @@
 		
 		
 		<dijit  type = "navigation"
-			    slider = "false"
-				sliderStyle = "large"
+			    slider = "true"
+				sliderStyle = "small"
 				homeButton = "true"
 				locateButton = "true" />			  	
 			   		
