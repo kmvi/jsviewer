@@ -2361,7 +2361,6 @@ function AddBasemapGalleryWidget()
 {   
 	if (config.widgets.gallery.googlemaps)
 	{
-		require(["agsjs/dijit/TOC"], function(AddGallery) { 
 			basemapGallery = new esri.dijit.BasemapGallery({
 				showArcGISBasemaps: config.widgets.gallery.arcgismaps,
 				google: {
@@ -2375,7 +2374,6 @@ function AddBasemapGalleryWidget()
 				basemaps: map.userBasemaps,
 				map:map
 			}, dojo.create ('div'));
-		});
 	}
 	else
 	{
