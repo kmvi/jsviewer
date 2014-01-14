@@ -2307,31 +2307,33 @@ function DirectionsClear ()
 
 function AddTocWidget() 
 {  
-	var layerInfos = [];
+	require(["agsjs/dijit/TOC"], function(AddTOC) { 
+		var layerInfos = [];
 	
-	for (var i = 0; i < map.layers.length; i++)
-	{
-		if (map.layers[i].toc)
+		for (var i = 0; i < map.layers.length; i++)
 		{
-			layerInfos.push (
-				{
-					layer    : map.layers[i],
-					title    : map.layers[i].title,
-					slider   : map.layers[i].tocSlider,
-					noLegend : (map.layers[i].tocSublayers == false)
-				}
-			);
+			if (map.layers[i].toc)
+			{
+				layerInfos.push (
+					{
+						layer    : map.layers[i],
+						title    : map.layers[i].title,
+						slider   : map.layers[i].tocSlider,
+						noLegend : (map.layers[i].tocSublayers == false)
+					}
+				);
+			}
 		}
-	}
 	
-	var toc = new agsjs.dijit.TOC({
-        map        : map,
-		layerInfos : layerInfos,
-		style      : 'standard',
-		id         : 'toc'
-    }, 'toc');
+		var toc = new agsjs.dijit.TOC({
+			map        : map,
+			layerInfos : layerInfos,
+			style      : 'standard',
+			id         : 'toc'
+		}, 'toc');
 	
-	toc.startup();	  
+		toc.startup();	  
+	});
 }
 
 function AddEditorWidget() 
@@ -2359,19 +2361,21 @@ function AddBasemapGalleryWidget()
 {   
 	if (config.widgets.gallery.googlemaps)
 	{
-		basemapGallery = new esri.dijit.BasemapGallery({
-			showArcGISBasemaps: config.widgets.gallery.arcgismaps,
-			google: {
-				apiOptions: {
-					v: '3.6' // use a specific version is recommended for production system.
+		require(["agsjs/dijit/TOC"], function(AddGallery) { 
+			basemapGallery = new esri.dijit.BasemapGallery({
+				showArcGISBasemaps: config.widgets.gallery.arcgismaps,
+				google: {
+					apiOptions: {
+						v: '3.6' // use a specific version is recommended for production system.
+					},
+					mapOptions: {
+						streetViewControl: false
+					}
 				},
-				mapOptions: {
-					streetViewControl: false
-				}
-			},
-			basemaps: map.userBasemaps,
-			map:map
-		}, dojo.create ('div'));
+				basemaps: map.userBasemaps,
+				map:map
+			}, dojo.create ('div'));
+		});
 	}
 	else
 	{
