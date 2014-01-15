@@ -6,7 +6,7 @@
 		
 		<heading
 			type = "image"
-			height = "63x"
+			height = "63px"
 			image = "images/header.png"
 			fillimage = "images/background.png"
 		/>

@@ -95,16 +95,16 @@
 			{
 				try
 				{
-					dojo.require("agsjs.dijit.TOC");
-					dojo.require("agsjs.layers.GoogleMapsLayer");
+					require(["agsjs/dijit/TOC"], function(gtoc, glayer) { 
+						dojo.require ('agsjs.layers.GoogleMapsLayer');
+						loading = dojo.byId("loadingImg");				
+						startApp();
+					});
 				}
 				catch (err)
 				{
 					alert ("Ошибка: не удалось загрузить библиотеку Google.");
 				}
-				
-				loading = dojo.byId("loadingImg");				
-				startApp();
 			}
 			
 			try

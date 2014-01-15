@@ -1743,8 +1743,7 @@ function OnMapLoad (evt)
 
 function OnMapClick(evt) 
 {	
-	// prevent twice firing event on mobile devices
-	if (evt.constructor.name != "Object")
+	if (evt.constructor !== Object)
 	{
 		return;
 	};
@@ -2114,6 +2113,7 @@ function LoadWidgets()
 		}
 		catch (err)
 		{
+			console.log (err);
 			ShowError (1, "Ошибка создания виджета выбора базовой карты.");
 		}
 	}
@@ -2306,34 +2306,32 @@ function DirectionsClear ()
 }
 
 function AddTocWidget() 
-{  
-	require(["agsjs/dijit/TOC"], function(AddTOC) { 
-		var layerInfos = [];
+{  	
+	var layerInfos = [];
 	
-		for (var i = 0; i < map.layers.length; i++)
+	for (var i = 0; i < map.layers.length; i++)
+	{
+		if (map.layers[i].toc)
 		{
-			if (map.layers[i].toc)
-			{
-				layerInfos.push (
-					{
-						layer    : map.layers[i],
-						title    : map.layers[i].title,
-						slider   : map.layers[i].tocSlider,
-						noLegend : (map.layers[i].tocSublayers == false)
-					}
-				);
-			}
+			layerInfos.push (
+				{
+					layer    : map.layers[i],
+					title    : map.layers[i].title,
+					slider   : map.layers[i].tocSlider,
+					noLegend : (map.layers[i].tocSublayers == false)
+				}
+			);
 		}
+	}
 	
-		var toc = new agsjs.dijit.TOC({
-			map        : map,
-			layerInfos : layerInfos,
-			style      : 'standard',
-			id         : 'toc'
-		}, 'toc');
+	var toc = new agsjs.dijit.TOC({
+		map        : map,
+		layerInfos : layerInfos,
+		style      : 'standard',
+		id         : 'toc'
+	}, 'toc');
 	
-		toc.startup();	  
-	});
+	toc.startup();	  
 }
 
 function AddEditorWidget() 
@@ -2360,12 +2358,12 @@ function resizeMap()
 function AddBasemapGalleryWidget() 
 {   
 	if (config.widgets.gallery.googlemaps)
-	{
+	{	
 			basemapGallery = new esri.dijit.BasemapGallery({
 				showArcGISBasemaps: config.widgets.gallery.arcgismaps,
 				google: {
 					apiOptions: {
-						v: '3.6' // use a specific version is recommended for production system.
+						v: '3.7' // use a specific version is recommended for production system.
 					},
 					mapOptions: {
 						streetViewControl: false
@@ -2383,6 +2381,8 @@ function AddBasemapGalleryWidget()
 			map:map
 		}, 'basemapPanel');
 	}
+	
+	console.log (basemapGallery);
 	
 	dijit.byId ('basemapPanel').set('content', basemapGallery.domNode);
 		dojo.connect(basemapGallery, "onSelectionChange", function () {
@@ -2614,8 +2614,6 @@ function AddNavigationWidgets()
 		
 		home.domNode.childNodes[1].childNodes[1].title = "Начальный экстент";
 		home.startup();		
-		
-		console.log (config.widgets.navigation.sliderStyle);
 		
 		if (config.widgets.navigation.slider)
 		{
