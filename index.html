@@ -7,10 +7,10 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	
-		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css">
-		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/document.css">		
-		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/esri/css/esri.css" />
-		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dojox/layout/resources/ExpandoPane.css">		
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/claro/claro.css">
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/dojo/dijit/themes/claro/document.css">		
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/esri/css/esri.css" />
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.8/js/dojo/dojox/layout/resources/ExpandoPane.css">		
 		<link rel="stylesheet" type="text/css" href="http://gmaps-utility-gis.googlecode.com/svn/tags/agsjs/latest/src/agsjs/css/agsjs.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		
@@ -71,6 +71,16 @@
 		<script type="text/javascript">
 			try
 			{
+				// IE 8 compatibility
+				if (!Array.prototype.indexOf) {
+					Array.prototype.indexOf = function(obj, start) {
+					 for (var i = (start || 0), j = this.length; i < j; i++) {
+						 if (this[i] === obj) { return i; }
+					 }
+					 return -1;
+					}
+				}
+				
 				var dojoConfig = {
 					parseOnLoad: true,
 					packages:[					
@@ -85,7 +95,7 @@
 			}
 		</script>
 		
-		<script src="http://js.arcgis.com/3.7/"></script>
+		<script src="http://js.arcgis.com/3.8/init.js"></script>
 		<script type="text/javascript" src="main/main.js"></script>
 		
 		<script type="text/javascript">

@@ -62,6 +62,8 @@ dojo.require("esri.dijit.LocateButton");
 //other
 dojo.require("app.OAuthHelper");
 
+var map;
+
 function ShowError (type, message)
 {
 	if (type == 0)
@@ -1317,23 +1319,23 @@ function Design()
 	if (config.design.heading.type == "caption")
 	{
 		dojo.byId("heading").innerHTML = config.design.heading.caption;
-		dojo.style(dojo.byId("heading"), "font-size", config.design.heading.fontsize);
-		dojo.style(dojo.byId("heading"), "font-family", config.design.heading.fontname);
+		dojo.style(dojo.byId("heading"), "fontSize", config.design.heading.fontsize);
+		dojo.style(dojo.byId("heading"), "fontFamily", config.design.heading.fontname);
 		dojo.style(dojo.byId("heading"), "color", config.design.heading.fontcolor);
-		dojo.style(dojo.byId("heading"), "background-color", config.design.heading.bgcolor);
-		dojo.style(dojo.byId("heading"), "text-align", config.design.heading.textalign);
+		dojo.style(dojo.byId("heading"), "backgroundColor", config.design.heading.bgcolor);
+		dojo.style(dojo.byId("heading"), "textAlign", config.design.heading.textalign);
 	}
 	else if (config.design.heading.type == "image")
-		{
-			dojo.style(dojo.byId("heading"), "background", "url(" + config.design.heading.fillimage + ") repeat-x");
-			dojo.style(dojo.byId("heading"), "background-position", "left top");
+	{
+		dojo.style(dojo.byId("heading"), "background", "url(" + config.design.heading.fillimage + ") repeat-x");
+		dojo.style(dojo.byId("heading"), "backgroundPosition", "left top");
 		
 			var img = document.createElement("img");
 			img.setAttribute ("src", config.design.heading.image);
 			dojo.style (img, "display", "block");
 			dojo.style (img, "left", "0px");
 			document.getElementById("heading").appendChild(img);
-		};
+	}
 }
 
 function LoadMap() 
@@ -1353,7 +1355,6 @@ function LoadMap()
 	{
 		var extent = null;
 	};
-	
 	
 	var slider = (config.widgets != undefined) && (config.widgets.navigation != undefined) && config.widgets.navigation.slider;
 	
@@ -1743,10 +1744,9 @@ function OnMapLoad (evt)
 
 function OnMapClick(evt) 
 {	
-	if (evt.constructor !== Object)
-	{
-		return;
-	};
+	// FIXME: IE 8 constructor == undefined
+	//if (evt.constructor !== Object)
+	//	return;
 	
 	if (activeTool == 'edit')
 	{		
@@ -2379,7 +2379,7 @@ function AddBasemapGalleryWidget()
 			showArcGISBasemaps: config.widgets.gallery.arcgismaps,
 			basemaps: map.userBasemaps,
 			map:map
-		}, 'basemapPanel');
+		}, dojo.create('div'));
 	}
 	
 	console.log (basemapGallery);
@@ -2996,7 +2996,7 @@ function AddGeocoderWidget()
             url  : config.tasks.geocoder.url,
 			singleLineFieldName : config.tasks.geocoder.singleLineFieldName,
             name : "geocoder",
-			placeholder: "Введите адрес",
+			placeholder: "Введите адрес"
         }];
 		
 		geocoder = new esri.dijit.Geocoder({
