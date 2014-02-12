@@ -62,7 +62,7 @@ dojo.require("esri.dijit.LocateButton");
 //other
 dojo.require("app.OAuthHelper");
 
-var map;
+var map = dojo.byId("map");
 
 function ShowError (type, message)
 {
@@ -135,7 +135,7 @@ function startApp()
 	}
 	
 	Design();
-	
+
 	if (config.portal == undefined)
 	{
 		LoadMap();
@@ -170,6 +170,7 @@ function ParseConfig()
 	
 	design.title = ((_design[0] == undefined) || (_design[0].getAttribute ('title') == undefined)) ? 'JavaScript Viewer for ArcGIS' : _design[0].getAttribute ('title');
 	design.theme = ((_design[0] == undefined) || (_design[0].getAttribute ('theme') == undefined)) ? 'gray' : _design[0].getAttribute ('theme');
+	design.extentPanel = ((_design[0] == undefined) || (_design[0].getAttribute ('extent-panel') == undefined)) ? false : _design[0].getAttribute ('extent-panel') == "true";
 	
 	if (_design[0] != undefined)
 	{
@@ -1306,7 +1307,7 @@ function GetItemUrls (items)
 function Design()
 {
 	document.title = config.design.title;
-	
+
 	var ss = document.createElement("link");
     ss.type = "text/css";
     ss.rel = "stylesheet";
@@ -1335,6 +1336,16 @@ function Design()
 			dojo.style (img, "display", "block");
 			dojo.style (img, "left", "0px");
 			document.getElementById("heading").appendChild(img);
+	}
+
+	if (config.design.extentPanel)
+	{
+		new dijit.layout.ContentPane({
+			      content: "",
+			      style: "height: 15px; padding-top: 0px; padding-left: 8px; padding-bottom: 0px",
+			      id: "extent-panel",
+			      class: "container"
+			    }).placeAt("map");
 	}
 }
 
@@ -1368,7 +1379,7 @@ function LoadMap()
 	}, dojo.create("div"));
 	
 	arcgisBaseMaps = ["satellite", "hybrid", "streets" , "topo", "gray", "national-geographic", "oceans", "osm"];
-	
+
 	if (config.map.options.basemap != undefined) 
 	{
 		if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
@@ -1388,7 +1399,10 @@ function LoadMap()
 	map.on ('layers-add-result', LayersAddedToMap);
 	map.on ('click', OnMapClick);
 	map.on ('load', OnMapLoad);
-	
+
+	if (config.design.extentPanel)
+		map.on('extent-change', showExtent);
+
 	var basemaps = [];
 
 	for (var i = 0, counti = config.map.basemaps.length; i < counti; i++)
@@ -3518,4 +3532,18 @@ function formatDate(date, datePattern) {
     selector: 'date',
     datePattern: datePattern
   });
+}
+
+function showExtent(evt)
+{
+	if (evt.extent != undefined)
+	{
+		var extent = evt.extent;
+		var s = 'XMin: ' + extent.xmin.toFixed(2) + ' ' +
+			'YMin: ' + extent.ymin.toFixed(2) + ' ' +
+			'XMax: ' + extent.xmax.toFixed(2) + ' ' +
+			'YMax: ' + extent.ymax.toFixed(2);
+		
+		dojo.byId('extent-panel').innerHTML = s;
+	}
 }

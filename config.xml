@@ -2,7 +2,8 @@
 <configuration>	
 	<design
 		title = "JavaScript Viewer for ArcGIS"
-		theme = "gray">
+		theme = "gray"
+		extent-panel = "true">
 		
 		<heading
 			type = "image"
