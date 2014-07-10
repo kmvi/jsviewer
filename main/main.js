@@ -1928,11 +1928,40 @@ function LayersAddedToMap (results)
 		}
 	}
 	
+	RenameSublayers();
+	
 	ApplyLoginFilter();
 	LoadWidgets();
 	dijit.byId('outerContainer').resize();
 	
 	SetBasemap();
+};
+
+function RenameSublayers()
+{
+	for (var i = 0, counti = config.map.layers.length; i < counti; i++) {
+		if (config.map.layers[i].type != "dynamic" || config.map.layers[i].sublayers == null) {
+			continue;
+		}
+		
+		for (var j = 0, countj = map.layers.length; j < countj; j++) {
+			if (map.layers[j].id == config.map.layers[i].id) {
+				map.layers[j].visibleLayers = [];
+				for (var k = 0, countk = config.map.layers[i].sublayers.length; k < countk; k++) {
+					map.layers[j].layerInfos[parseInt(config.map.layers[i].sublayers[k].id)].name = config.map.layers[i].sublayers[k].title;
+					map.layers[j].layerInfos[parseInt(config.map.layers[i].sublayers[k].id)].visible = config.map.layers[i].sublayers[k].visible;
+					if (config.map.layers[i].sublayers[k].visible == true) {
+						map.layers[j].visibleLayers.push(config.map.layers[i].sublayers[k].id);
+					}
+				}
+				
+				map.layers[j].setVisibleLayers(map.layers[j].visibleLayers);
+				//map.layers[j].refresh();
+			}
+		}
+	}
+	
+	//map.setExtent(map.extent);
 };
 
 function ApplyLoginFilter()
