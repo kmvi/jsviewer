@@ -1388,12 +1388,12 @@ function LoadMap()
 		}
 		else
 		{
-			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  sliderStyle, basemap : 'osm', infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
+			map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle: sliderStyle, basemap : 'osm', infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
 		}
 	}
 	else
 	{
-		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle:  config.map.options.slider, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
+		map = new esri.Map("map",{extent: extent, slider: slider, sliderStyle: sliderStyle, infoWindow: popup,  wrapAround180 : config.map.options.wrapAround180, logo : config.map.options.logoVisible, showAttribution: config.map.options.attributionVisible, fadeOnZoom: true, showInfoWindowOnClick : false});
 	}
 	
 	map.on ('layers-add-result', LayersAddedToMap);
@@ -2438,7 +2438,7 @@ function AddBasemapGalleryWidget()
 function SetBasemap()
 {	
 	
-	if (arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
+	if (map.userBasemaps.length == 0 || arcgisBaseMaps.indexOf (config.map.options.basemap) >= 0)
 	{
 		loadAppDialog.hide();
 		return;
