@@ -230,7 +230,7 @@ function ParseConfig()
 	
 	if (_proxy[0] != undefined)
 	{
-		esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("useproxy") == "true");
+		esri.config.defaults.io.alwaysUseProxy = (_proxy[0].getAttribute("useProxy") == "true");
 		esri.config.defaults.io.proxyUrl = (_proxy[0].getAttribute("proxyUrl") == undefined) ? 'proxy.ashx' : _proxy[0].getAttribute("proxyUrl");
 	}
 	
